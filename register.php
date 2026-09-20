@@ -192,7 +192,7 @@ if($_SERVER["REQUEST_METHOD"]=="POST")
                     <?php echo htmlspecialchars($success , ENT_QUOTES, 'UTF-8'); ?>
                 </p> 
 
-                <?php endif; ?>
+                <?php endif; ?> 
 
             <form action="register.php" method="post">
                 <label for="name">full Name</label>
