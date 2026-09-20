@@ -44,8 +44,14 @@
                   placeholder="Confirm your password"
                    required>
 
+        <button type="submit">Register</button>
+
 
               </form>
+
+              <p class="login-link">
+                Already have an account? <a href="login.php">Login</a>
+            </p>
                 
         </main>
     </body>
