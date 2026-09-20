@@ -29,12 +29,58 @@ if($_SERVER["REQUEST_METHOD"]=="POST")
            else if ($password !== $confirm_password){
             $error="Passwords do not match.";
            }
-           else{
-            $success="form validation successful";
+           else {
+            try{
+                mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
+                require_once "config/database.php";
+                $conn-> set_charset("utf8mb4");
+                
+                //ckeck wether email is already registered
+                $check = $conn->prepare(
+                    "SELECT id FROM users WHERE email = ?"
+                    );
+
+                    $check->bind_param("s", $email);
+                    $check->execute();
+                    $check->store_result();
+                    
+            if ($check->num_rows > 0){
+                $error="This email is already registered. Please use a different email or login.";
+            } else if (strlen($password ) >72){
+                $error=" Password must be less than 72 characters.";
+
+            } else{
+                // hash the password before storing it 
+                $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+
+                // public registration always creates tenants 
+
+                $role="tenant";
+                $insert = $conn->prepare(
+                    "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)"
+                    );
+                $insert->bind_param("ssss", $name, $email, $hashed_password, $role);
+                $insert->execute();
+                $insert->close();
+                $success="Account created successfully. You can now <a href='login.php'>login</a>.";
+            }
+
+               $check->close();
+            }catch (mysqli_sql_exception $exception){
+                if ($exception->getCode() === 1062){
+                    $error="This email is already registered. Please use a different email or login.";
+                } else{
+                    error_log("Registration error: " . $exception->getMessage());
+                    $error="Unable to create your account . Please try again later.";
+                  
+
+
+            }
            }
             
 
-    }
+    }}
     ?>
 
 <!DOCTYPE html>
