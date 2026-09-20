@@ -19,7 +19,7 @@ if($_SERVER["REQUEST_METHOD"]=="POST")
         $error = "Please fill in all the required fields.";
 
     } else if (
-            mb_strlen($name) >100 ||
+            mb_strlen($name) >100 || 
             mb_strlen($email) >150 
         ){
            $error="Name must be less than 100 characters and email must be less than 150 characters.";  }
