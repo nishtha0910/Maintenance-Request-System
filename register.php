@@ -33,12 +33,12 @@ if($_SERVER["REQUEST_METHOD"]=="POST")
             try{
                 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-                require_once "config/database.php";
+                require_once __DIR__ . "/config/database.php";
                 $conn-> set_charset("utf8mb4");
                 
                 //ckeck wether email is already registered
                 $check = $conn->prepare(
-                    "SELECT id FROM users WHERE email = ?"
+                    "SELECT user_id FROM users WHERE email = ?"
                     );
 
                     $check->bind_param("s", $email);
@@ -63,7 +63,7 @@ if($_SERVER["REQUEST_METHOD"]=="POST")
                 $insert->bind_param("ssss", $name, $email, $hashed_password, $role);
                 $insert->execute();
                 $insert->close();
-                $success="Account created successfully. You can now <a href='login.php'>login</a>.";
+                $success="Account created successfully. You can now log in.";
             }
 
                $check->close();
@@ -71,7 +71,7 @@ if($_SERVER["REQUEST_METHOD"]=="POST")
                 if ($exception->getCode() === 1062){
                     $error="This email is already registered. Please use a different email or login.";
                 } else{
-                    error_log("Registration error: " . $exception->getMessage());
+                    error_log("Registration database error: " . $exception->getMessage());
                     $error="Unable to create your account . Please try again later.";
                   
 
