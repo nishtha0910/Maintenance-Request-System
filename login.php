@@ -1,3 +1,48 @@
+<?php
+$error = "";
+$success = "";
+
+if ($_SERVER["REQUEST_METHOD"] === "POST"){
+    $email = trim($_POST["email"] ?? '');
+    $password = $_POST["password"] ?? '';
+
+    if ($email === "" || $password === ""){
+        $error = "Please fill in all the required fields.";
+    } else if  (!filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $error = "Please enter a valid email address.";
+    } else {
+        try {
+            mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+            require_once __DIR__ . "/config/database.php";
+            $conn->set_charset("utf8mb4");
+
+            $check = $conn->prepare(
+                "SELECT user_id, name, email, password, role FROM users WHERE email = ?"
+            );
+
+            $check->bind_param("s", $email);
+            $check->execute();
+
+            $result = $check->get_result();
+            $user = $result->fetch_assoc();
+
+            //check entered password against the hashed password in the database
+
+            if ($user && password_verify($password, $user['password'])) {
+                $success = "Login successful. Welcome, " . htmlspecialchars($user['name']) . "!";
+            } else {
+                $error = "Invalid email or password.";
+            }
+            $check->close();
+        } catch (mysqli_sql_exception $exception) {
+            error_log("Login database error: " . $exception->getMessage());
+            $error = "Unable to process your login. Please try again later.";
+        }
+    }
+       
+}
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -94,6 +139,29 @@
         <h1>Maintenance Request System</h1>
         <h2>Login</h2>
         <p> Enter your credentials to log in.</p>
+
+        <?php if ($error): ?>
+            <p role="alert">
+                <?php echo htmlspecialchars($error , ENT_QUOTES, 'UTF-8'); ?>
+            </p>
+            <?php endif; ?>
+                <?php if ($success !==""): ?>
+            <p role="alert">
+                <?php echo htmlspecialchars($success , ENT_QUOTES, 'UTF-8'); ?>
+                </p>
+                <?php endif; ?>
+
+
+        <form action="login.php" method="post">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email"   placeholder="Enter your email" autocomplete="username"  required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password"  autocomplete="current-password"  required>
+            <button type="submit">Login</button>
+        </form>
+        <div class="login-link">
+            <p>Don't have an account ? <a href="register.php">Register here</a></p>
+        </div>
     </main>
 </body>
 </html>
