@@ -1,4 +1,5 @@
 <?php
+session_start();
 $error = "";
 $success = "";
 
@@ -29,7 +30,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST"){
             //check entered password against the hashed password in the database
 
             if ($user && password_verify($password, $user['password'])) {
-                $success = "Login successful. Welcome, " . htmlspecialchars($user['name']) . "!";
+                session_regenerate_id(true);
+
+               $_SESSION["user_id"] = $user["user_id"];
+               $_SESSION["name"] = $user["name"];
+               $_SESSION["role"] = $user["role"];
+
+                header("Location: tenant_dashboard.php");
+            exit;
             } else {
                 $error = "Invalid email or password.";
             }
