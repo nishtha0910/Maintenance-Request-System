@@ -36,8 +36,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST"){
                $_SESSION["name"] = $user["name"];
                $_SESSION["role"] = $user["role"];
 
+               if($_SESSION["role"] === "admin"){
+                header("Location: admin_dashboard.php");
+                exit;
+               } else if ($_SESSION["role"] === "tenant"){
                 header("Location: tenant_dashboard.php");
-            exit;
+                exit;
+               } else {
+                $_SESSION = [];
+                session_destroy();
+
+                http_response_code(403);
+                exit("Access denied. Invalid user role.");
+               }
             } else {
                 $error = "Invalid email or password.";
             }
