@@ -12,6 +12,10 @@ if (($_SESSION["role"]?? "")!== "tenant") {
     exit ("Access denied");
 }
 
+if (empty($_SESSION["logout_token"])) {
+    $_SESSION["logout_token"] = bin2hex(random_bytes(32));
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -29,6 +33,14 @@ if (($_SESSION["role"]?? "")!== "tenant") {
             Welcome, 
             <?php echo htmlspecialchars($_SESSION["name"], ENT_QUOTES, 'UTF-8'); ?>! </p>
             <p> Your Maintenance Request will appear here.</p>
+
+            <form action="logout.php" method="POST">
+            <input type="hidden" name="logout_token" value="
+            <?php echo htmlspecialchars($_SESSION["logout_token"], ENT_QUOTES, 'UTF-8'); ?>">
+
+            <button type="submit">Logout</button>
+                 
+            </form>
     </body>
 
 </html>
