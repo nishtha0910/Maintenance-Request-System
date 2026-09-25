@@ -1,4 +1,6 @@
 <?php
+
+require_once __DIR__ . "/includes/auth.php"; 
 $error="";
 $success="";
 
@@ -52,7 +54,7 @@ if($_SERVER["REQUEST_METHOD"]=="POST")
 
             } else{
                 // hash the password before storing it 
-                $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+                $hashed_password = hashUserPassword($password);
 
                 // public registration always creates tenants 
 
