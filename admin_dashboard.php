@@ -1,14 +1,15 @@
 <?php
 session_start();
+require_once __DIR__ . "/includes/auth.php";
 
 //require login 
 if (!isset($_SESSION["user_id"])) {
     header("Location: login.php");
     exit;
 }
-if (($_SESSION["role"]?? "")!== "admin") {
+if (!canAccessRole($_SESSION, "admin")) {
     http_response_code(403);
-    exit ("Access denied");
+    exit("Access denied.");
 }
 // Create a token for logout.
 if (empty($_SESSION["logout_token"])) {
@@ -16,8 +17,7 @@ if (empty($_SESSION["logout_token"])) {
     $token = bin2hex($randomBytes);
 
     $_SESSION["logout_token"] = $token;
-}
-
+}  
 ?>
 <DOCTYPE html>
     <html lang="en">

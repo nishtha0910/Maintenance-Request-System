@@ -1,5 +1,6 @@
 <?php 
 session_start();
+require_once __DIR__ . "/includes/auth.php";
 
 if (!isset($_SESSION["user_id"])) {
     header("Location: login.php");
@@ -7,9 +8,9 @@ if (!isset($_SESSION["user_id"])) {
 
 }
 
-if (($_SESSION["role"]?? "")!== "tenant") {
+if (!canAccessRole($_SESSION, "tenant")) {
     http_response_code(403);
-    exit ("Access denied");
+    exit("Access denied.");
 }
 
 if (empty($_SESSION["logout_token"])) {
@@ -35,12 +36,20 @@ if (empty($_SESSION["logout_token"])) {
             <p> Your Maintenance Request will appear here.</p>
 
             <form action="logout.php" method="POST">
-            <input type="hidden" name="logout_token" value="
-            <?php echo htmlspecialchars($_SESSION["logout_token"], ENT_QUOTES, 'UTF-8'); ?>">
+            <input
+                   type="hidden"
+                    name="token"
+                    value="<?php echo htmlspecialchars(
+                     $_SESSION["logout_token"],
+                     ENT_QUOTES,
+                     'UTF-8'
+    ); ?>"
+>
 
             <button type="submit">Logout</button>
                  
-            </form>
+</form> 
+
     </body>
 
 </html>
