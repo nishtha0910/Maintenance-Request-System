@@ -106,6 +106,7 @@ try{
                     </dl>
 
                     <p><a href="EditProfile.php">Edit Profile</a></p>
+                    <p><a href="change_password.php">Change Password</a></p>
 
                      <?php endif; ?>
 
