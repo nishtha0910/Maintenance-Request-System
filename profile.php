@@ -105,6 +105,8 @@ try{
                         <dd><?php echo htmlspecialchars($profile["role"], ENT_QUOTES, 'UTF-8'); ?></dd>
                     </dl>
 
+                    <p><a href="EditProfile.php">Edit Profile</a></p>
+
                      <?php endif; ?>
 
         </main>
