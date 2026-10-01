@@ -178,6 +178,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST"){
             <input type="password" id="password" name="password" placeholder="Enter your password"  autocomplete="current-password"  required>
             <button type="submit">Login</button>
         </form>
+        <p class="login-link">
+        <a href="forgot_password.php">Forgot Password?</a></p>
         <div class="login-link">
             <p>Don't have an account ? <a href="register.php">Register here</a></p>
         </div>
