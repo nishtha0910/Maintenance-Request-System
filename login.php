@@ -1,66 +1,190 @@
 <?php
 session_start();
+
+require_once __DIR__ . "/includes/login_security.php";
+
 $error = "";
 $success = "";
+$transactionStarted = false;
 
-if ($_SERVER["REQUEST_METHOD"] === "POST"){
-    $email = trim($_POST["email"] ?? '');
-    $password = $_POST["password"] ?? '';
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $email = $_POST["email"] ?? "";
+    $password = $_POST["password"] ?? "";
 
-    if ($email === "" || $password === ""){
-        $error = "Please fill in all the required fields.";
-    } else if  (!filter_var($email, FILTER_VALIDATE_EMAIL)){
-        $error = "Please enter a valid email address.";
+    if (!is_string($email) || !is_string($password)) {
+        $error = "Invalid login details.";
     } else {
-        try {
-            mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-            require_once __DIR__ . "/config/database.php";
-            $conn->set_charset("utf8mb4");
+        $email = trim($email);
 
-            $check = $conn->prepare(
-                "SELECT user_id, name, email, password, role FROM users WHERE email = ?"
-            );
+        if ($email === "" || $password === "") {
+            $error = "Please fill in all the required fields.";
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $error = "Please enter a valid email address.";
+        } else {
+            try {
+                mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+                require_once __DIR__ . "/config/database.php";
 
-            $check->bind_param("s", $email);
-            $check->execute();
+                $conn->set_charset("utf8mb4");
+                $conn->begin_transaction();
+                $transactionStarted = true;
 
-            $result = $check->get_result();
-            $user = $result->fetch_assoc();
+                // Serialize login attempts for this account.
+                $check = $conn->prepare(
+                    "SELECT user_id, name, password, role, locked_until,
+                            (locked_until > UTC_TIMESTAMP()) AS is_locked
+                     FROM users
+                     WHERE email = ?
+                     FOR UPDATE"
+                );
+                $check->bind_param("s", $email);
+                $check->execute();
+                $user = $check->get_result()->fetch_assoc();
+                $check->close();
 
-            //check entered password against the hashed password in the database
+                $authenticated = false;
 
-            if ($user && password_verify($password, $user['password'])) {
-                session_regenerate_id(true);
+                if (!$user) {
+                    $error = "Invalid email or password.";
+                } elseif ((int) $user["is_locked"] === 1) {
+                    $error = "Account temporarily locked. Please try again later.";
+                } else {
+                    $userId = (int) $user["user_id"];
 
-               $_SESSION["user_id"] = $user["user_id"];
-               $_SESSION["name"] = $user["name"];
-               $_SESSION["role"] = $user["role"];
+                    // Clear the previous lock once it has expired.
+                    if ($user["locked_until"] !== null) {
+                        $clear = $conn->prepare(
+                            "DELETE FROM login_attempts WHERE user_id = ?"
+                        );
+                        $clear->bind_param("i", $userId);
+                        $clear->execute();
+                        $clear->close();
 
-               if($_SESSION["role"] === "admin"){
-                header("Location: admin_dashboard.php");
-                exit;
-               } else if ($_SESSION["role"] === "tenant"){
-                header("Location: tenant_dashboard.php");
-                exit;
-               } else {
-                $_SESSION = [];
-                session_destroy();
+                        $unlock = $conn->prepare(
+                            "UPDATE users
+                             SET locked_until = NULL
+                             WHERE user_id = ?"
+                        );
+                        $unlock->bind_param("i", $userId);
+                        $unlock->execute();
+                        $unlock->close();
+                    }
 
-                http_response_code(403);
-                exit("Access denied. Invalid user role.");
-               }
-            } else {
-                $error = "Invalid email or password.";
+                    if (password_verify($password, $user["password"])) {
+                        // Successful login clears earlier failures.
+                        $clear = $conn->prepare(
+                            "DELETE FROM login_attempts WHERE user_id = ?"
+                        );
+                        $clear->bind_param("i", $userId);
+                        $clear->execute();
+                        $clear->close();
+
+                        $authenticated = true;
+                    } else {
+                        // Remove attempts outside the ten-minute window.
+                        $cleanup = $conn->prepare(
+                            "DELETE FROM login_attempts
+                             WHERE user_id = ?
+                             AND attempted_at <=
+                                 DATE_SUB(UTC_TIMESTAMP(), INTERVAL 10 MINUTE)"
+                        );
+                        $cleanup->bind_param("i", $userId);
+                        $cleanup->execute();
+                        $cleanup->close();
+
+                        // Record this failed attempt.
+                        $record = $conn->prepare(
+                            "INSERT INTO login_attempts (user_id, attempted_at)
+                             VALUES (?, UTC_TIMESTAMP())"
+                        );
+                        $record->bind_param("i", $userId);
+                        $record->execute();
+                        $record->close();
+
+                        // Read failure times using the database's UTC clock.
+                        $attempts = $conn->prepare(
+                            "SELECT attempted_at, UTC_TIMESTAMP() AS checked_at
+                             FROM login_attempts
+                             WHERE user_id = ?"
+                        );
+                        $attempts->bind_param("i", $userId);
+                        $attempts->execute();
+                        $attemptRows = $attempts->get_result()
+                            ->fetch_all(MYSQLI_ASSOC);
+                        $attempts->close();
+
+                        $failedAttemptTimes = [];
+
+                        foreach ($attemptRows as $attemptRow) {
+                            $failedAttemptTimes[] = strtotime(
+                                $attemptRow["attempted_at"] . " UTC"
+                            );
+                        }
+
+                        // The attempt inserted above guarantees a row exists.
+                        $checkedAt = strtotime(
+                            $attemptRows[0]["checked_at"] . " UTC"
+                        );
+
+                        // Use the same rule that our PHPUnit tests exercise.
+                        if (shouldLockAccount($failedAttemptTimes, $checkedAt)) {
+                            $lock = $conn->prepare(
+                                "UPDATE users
+                                 SET locked_until =
+                                     DATE_ADD(UTC_TIMESTAMP(), INTERVAL 10 MINUTE)
+                                 WHERE user_id = ?"
+                            );
+                            $lock->bind_param("i", $userId);
+                            $lock->execute();
+                            $lock->close();
+
+                            $error = "Account locked for 10 minutes after 5 failed login attempts.";
+                        } else {
+                            $error = "Invalid email or password.";
+                        }
+                    }
+                }
+
+                $conn->commit();
+                $transactionStarted = false;
+
+                if ($authenticated) {
+                    if (!in_array($user["role"], ["admin", "tenant"], true)) {
+                        $_SESSION = [];
+                        session_destroy();
+
+                        http_response_code(403);
+                        exit("Access denied. Invalid user role.");
+                    }
+
+                    session_regenerate_id(true);
+
+                    $_SESSION["user_id"] = $user["user_id"];
+                    $_SESSION["name"] = $user["name"];
+                    $_SESSION["role"] = $user["role"];
+
+                    $destination = $user["role"] === "admin"
+                        ? "admin_dashboard.php"
+                        : "tenant_dashboard.php";
+
+                    header("Location: " . $destination);
+                    exit;
+                }
+            } catch (mysqli_sql_exception $exception) {
+                if ($transactionStarted) {
+                    $conn->rollback();
+                }
+
+                error_log(
+                    "Login database error: " . $exception->getCode()
+                );
+
+                http_response_code(500);
+                $error = "Unable to process your login. Please try again later.";
             }
-            $check->close();
-        } catch (mysqli_sql_exception $exception) {
-            error_log("Login database error: " . $exception->getMessage());
-            $error = "Unable to process your login. Please try again later.";
         }
     }
-       
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
