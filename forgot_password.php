@@ -67,11 +67,11 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
                     $recent->execute();
                     $recent-> store_result();
 
-                    $requestCount = $recent->num_rows >0;
+                   $requestedRecently  = $recent->num_rows >0;
                     $recent->close();
 
                     
-                         if (!$requestedrecently)  {
+                         if (!$requestedRecently)  {
                         $resetToken = bin2hex(random_bytes(32));
                         $tokenHash = hash("sha256", $resetToken);
 
@@ -219,6 +219,18 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
         <main class="reset-box">
             <h1>Forgot Password</h1>
             <p>Enter your email address below and we'll send you a link to reset your password.</p>
+
+            <?php if ($error !== ""): ?>
+                <p role="alert">
+              <?php echo htmlspecialchars($error, ENT_QUOTES, "UTF-8"); ?>
+                </p>
+<?php endif; ?>
+
+            <?php if ($message !== ""): ?>
+                <p role="status">
+              <?php echo htmlspecialchars($message, ENT_QUOTES, "UTF-8"); ?>
+               </p>
+<?php endif; ?>
 
             <form action="forgot_password.php" method="POST">
                 <input type="hidden" name="token"
