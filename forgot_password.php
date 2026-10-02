@@ -46,7 +46,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
 
 
                 $check = $conn->prepare(
-                    "SELECT user_id FROM users WHERE email = ? FOR UPDATE"
+                    "SELECT user_id, email FROM users WHERE email = ? FOR UPDATE"
                 );
                 $check->bind_param("s", $email);
                 $check->execute();
@@ -59,10 +59,11 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
                 if($user){
                     $user_id = $user["user_id"];
 
-                    $recent= $conn->prepare(
-                        "SELECT request_time FROM password_reset_requests
-                        WHERE user_id = ? AND expires_at > DATE_ADD(UTC_TIMESTAMP(), INTERVAL 14 MINUTE)"
-                    );
+                   $recent = $conn->prepare(
+                   "SELECT reset_id FROM password_reset_tokens
+                    WHERE user_id = ?
+                    AND expires_at > DATE_ADD(UTC_TIMESTAMP(), INTERVAL 14 MINUTE)"
+                   );
                     $recent->bind_param("i", $user_id);
                     $recent->execute();
                     $recent-> store_result();
