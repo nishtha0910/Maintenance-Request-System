@@ -104,23 +104,43 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
                 $conn->commit();
                 $transactionStarted = false;
 
-                if ($sendLink) {
+                               if ($sendLink) {
                     $resetLink =
                         "http://localhost/maintenance-request-system/reset_password.php"
                         . "?token=" . urlencode($resetToken);
 
-                    $emailMessage =
-                        "A password reset was requested for your account.\n\n"
-                        . "Open this link to choose a new password:\n"
-                        . $resetLink . "\n\n"
-                        . "This link expires in 15 minutes.\n"
-                        . "If you did not request this, ignore this email.";
+                    $safeLink = htmlspecialchars(
+                        $resetLink,
+                        ENT_QUOTES,
+                        "UTF-8"
+                    );
+
+                    $emailBody = '
+                        <h2>Reset your password</h2>
+                        <p>Click the button below to choose a new password.</p>
+
+                        <p>
+                            <a href="' . $safeLink . '"
+                               style="display: inline-block;
+                                      padding: 14px 24px;
+                                      background-color: #1d4ed8;
+                                      color: #ffffff;
+                                      text-decoration: none;
+                                      border-radius: 6px;
+                                      font-family: Arial, sans-serif;">
+                                Reset Password
+                            </a>
+                        </p>
+
+                        <p>This link expires in 15 minutes.</p>
+                        <p>If you did not request this, you can ignore this email.</p>
+                    ';
 
                     sendEmail(
                         $user["email"],
                         "Reset Your Maintenance System Password",
-                        $emailMessage
-                    );
+                        $emailBody
+);
                 }
             } catch (Throwable $exception) {
                 if ($transactionStarted) {
