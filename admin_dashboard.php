@@ -34,6 +34,8 @@ if (empty($_SESSION["logout_token"])) {
         <p>
             Maintenance Requests will appear here.
         </p>
+
+        <p><a href="profile.php">My Profile</a></p>
         <form action="logout.php" method="POST">
             <input type="hidden" name="token"
              value="

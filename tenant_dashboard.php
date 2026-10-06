@@ -35,6 +35,8 @@ if (empty($_SESSION["logout_token"])) {
             <?php echo htmlspecialchars($_SESSION["name"], ENT_QUOTES, 'UTF-8'); ?>! </p>
             <p> Your Maintenance Request will appear here.</p>
 
+            <p><a href="profile.php">My Profile</a></p>
+
             <form action="logout.php" method="POST">
             <input
                    type="hidden"
