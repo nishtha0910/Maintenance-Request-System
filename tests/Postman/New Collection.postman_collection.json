@@ -1,0 +1,203 @@
+{
+  "info": {
+    "_postman_id": "c1af564d-5f84-4a68-a34f-b5a90da56f36",
+    "name": "New Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "56858112",
+    "_collection_link": "https://go.postman.co/collection/56858112-c1af564d-5f84-4a68-a34f-b5a90da56f36?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Maintenance Request System - Milestone 1",
+      "item": [
+        {
+          "name": "API-01 Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Registration returns 201 Created\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"A tenant account is created with the submitted details\", function () {\r\n    const sent = JSON.parse(\r\n        pm.variables.replaceIn(pm.request.body.raw)\r\n    );\r\n    const data = pm.response.json();\r\n\r\n    pm.expect(data.user.user_id).to.be.a(\"number\").and.above(0);\r\n    pm.expect(data.user.name).to.eql(sent.name);\r\n    pm.expect(data.user.email).to.eql(sent.email);\r\n    pm.expect(data.user.role).to.eql(\"tenant\");\r\n    pm.expect(data.user).not.to.have.property(\"password\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableCookies": false,
+            "followRedirects": true,
+            "protocolVersion": "auto",
+            "strictSSL": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"API Test User\",\r\n  \"email\": \"api-test-021@example.com\",\r\n  \"password\": \"{{password}}\"\r\n  \r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost/maintenance-request-system/api/register.php",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "path": [
+                "maintenance-request-system",
+                "api",
+                "register.php"
+              ]
+            },
+            "description": "API-01 Register User."
+          },
+          "response": []
+        },
+        {
+          "name": "API-02 Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login returns 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Login returns user details and a CSRF token\", function () {\r\n    const data = pm.response.json();\r\n\r\n    pm.expect(data.message).to.eql(\"Login successful.\");\r\n    pm.expect(data.user.email).to.eql(\"api-test-01@example.com\");\r\n    pm.expect(data.csrf_token).to.match(/^[a-f0-9]{64}$/);\r\n\r\n    pm.collectionVariables.set(\"csrf_token\", data.csrf_token);\r\n});"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableCookies": false,
+            "followRedirects": true,
+            "protocolVersion": "auto",
+            "strictSSL": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"api-test-01@example.com\",\r\n  \"password\": \"{{password}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost/maintenance-request-system/api/login.php",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "path": [
+                "maintenance-request-system",
+                "api",
+                "login.php"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "API-03 View Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Profile returns 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Profile belongs to the logged-in account\", function () {\r\n    const data = pm.response.json();\r\n\r\n    pm.expect(data.profile.email).to.eql(\"api-test-01@example.com\");\r\n    pm.expect(data.profile.role).to.eql(\"tenant\");\r\n    pm.expect(data.profile).not.to.have.property(\"password\");\r\n});\r\n\r\npm.test(\"Profile returns a CSRF token\", function () {\r\n    const data = pm.response.json();\r\n\r\n    pm.expect(data.csrf_token).to.match(/^[a-f0-9]{64}$/);\r\n    pm.collectionVariables.set(\"csrf_token\", data.csrf_token);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost/maintenance-request-system/api/profile.php",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "path": [
+                "maintenance-request-system",
+                "api",
+                "profile.php"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "API-04 Update Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Profile update returns 200 OK\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response confirms the requested changes\", function () {\r\n    const sent = JSON.parse(\r\n        pm.variables.replaceIn(pm.request.body.raw)\r\n    );\r\n    const data = pm.response.json();\r\n\r\n    pm.expect(data.message).to.eql(\"Profile updated successfully.\");\r\n    pm.expect(data.profile.name).to.eql(sent.name);\r\n    pm.expect(data.profile.email).to.eql(sent.email);\r\n    pm.expect(data.profile.role).to.eql(\"tenant\");\r\n    pm.expect(data.profile).not.to.have.property(\"password\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableCookies": false,
+            "followRedirects": true,
+            "protocolVersion": "auto",
+            "strictSSL": false
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-CSRF-Token",
+                "value": "{{csrf_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"API Test User Updated\",\r\n  \"email\": \"api-test-01@example.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost/maintenance-request-system/api/profile.php",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "path": [
+                "maintenance-request-system",
+                "api",
+                "profile.php"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "csrf_token",
+      "value": ""
+    }
+  ]
+}
