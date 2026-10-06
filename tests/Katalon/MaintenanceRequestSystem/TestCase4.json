@@ -1,0 +1,166 @@
+{
+    "configuration": {
+        "device": {
+            "orientation": "landscape",
+            "deviceName": "Desktop"
+        }
+    },
+    "type": "clickpath",
+    "version": "1.0",
+    "events": [
+        {
+            "description": "Loading of \"http://localhost/maintenance-request-system/register.php\"",
+            "wait": {
+                "waitFor": "page_complete"
+            },
+            "target": {},
+            "type": "navigate",
+            "url": "http://localhost/maintenance-request-system/register.php"
+        },
+        {
+            "description": "click",
+            "wait": {
+                "waitFor": "page_complete"
+            },
+            "target": {
+                "locators": [
+                    {
+                        "type": "css",
+                        "value": "#name"
+                    }
+                ]
+            },
+            "type": "click",
+            "button": 0
+        },
+        {
+            "description": "type John",
+            "wait": {
+                "waitFor": "page_complete"
+            },
+            "target": {
+                "locators": [
+                    {
+                        "type": "css",
+                        "value": "#name"
+                    }
+                ]
+            },
+            "type": "keystrokes",
+            "textValue": "John",
+            "simulateBlurEvent": true,
+            "masked": false
+        },
+        {
+            "description": "click",
+            "wait": {
+                "waitFor": "page_complete"
+            },
+            "target": {
+                "locators": [
+                    {
+                        "type": "css",
+                        "value": "#email"
+                    }
+                ]
+            },
+            "type": "click",
+            "button": 0
+        },
+        {
+            "description": "type js56@test.com",
+            "wait": {
+                "waitFor": "page_complete"
+            },
+            "target": {
+                "locators": [
+                    {
+                        "type": "css",
+                        "value": "#email"
+                    }
+                ]
+            },
+            "type": "keystrokes",
+            "textValue": "js56@test.com",
+            "simulateBlurEvent": true,
+            "masked": false
+        },
+        {
+            "description": "click",
+            "wait": {
+                "waitFor": "page_complete"
+            },
+            "target": {
+                "locators": [
+                    {
+                        "type": "css",
+                        "value": "#password"
+                    }
+                ]
+            },
+            "type": "click",
+            "button": 0
+        },
+        {
+            "description": "type NiajjV98",
+            "wait": {
+                "waitFor": "page_complete"
+            },
+            "target": {
+                "locators": [
+                    {
+                        "type": "css",
+                        "value": "#password"
+                    }
+                ]
+            },
+            "type": "keystrokes",
+            "textValue": "NiajjV98",
+            "simulateBlurEvent": true,
+            "masked": false
+        },
+        {
+            "description": "click",
+            "wait": {
+                "waitFor": "page_complete"
+            },
+            "target": {
+                "locators": [
+                    {
+                        "type": "css",
+                        "value": "#confirm_password"
+                    }
+                ]
+            },
+            "type": "click",
+            "button": 0
+        },
+        {
+            "description": "type NiajjV98",
+            "wait": {
+                "waitFor": "page_complete"
+            },
+            "target": {
+                "locators": [
+                    {
+                        "type": "css",
+                        "value": "#confirm_password"
+                    }
+                ]
+            },
+            "type": "keystrokes",
+            "textValue": "NiajjV98",
+            "simulateBlurEvent": true,
+            "masked": false
+        },
+        {
+            "description": "send keys",
+            "wait": {
+                "waitFor": "page_complete"
+            },
+            "target": {},
+            "type": "javascript",
+            "javaScript": "\n                const keys = [13];\n                const elem = typeof $ !== 'undefined' ? $('#confirm_password')[0] : document.querySelector('#confirm_password');\n                keys.forEach((key) => {\n                    let eventObj = document.createEvent(\"Events\");\n                    eventObj.initEvent(\"keydown\", true, true);\n                    eventObj.key = key;\n                    eventObj.keyCode = key;\n                    eventObj.which = key;\n                    eventObj.charCode = key;\n                    \n                    elem.dispatchEvent(eventObj);\n                    eventObj = document.createEvent(\"Events\");\n                    eventObj.initEvent(\"keypress\", true, true);\n                    eventObj.key = key;\n                    eventObj.keyCode = key;\n                    eventObj.which = key;\n                    eventObj.charCode = key;\n                    elem.dispatchEvent(eventObj);\n                    \n                    eventObj = document.createEvent(\"Events\");\n                    eventObj.initEvent(\"keyup\", true, true);\n                    eventObj.key = key;\n                    eventObj.keyCode = key;\n                    eventObj.which = key;\n                    eventObj.charCode = key;\n                    elem.dispatchEvent(eventObj);\n                });"
+        }
+    ]
+}
