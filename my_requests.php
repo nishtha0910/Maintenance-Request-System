@@ -164,6 +164,11 @@ function escapeHtml(string $value): string
                     <dt>Last Updated (UTC)</dt>
                     <dd><?php echo escapeHtml($request["date_updated"]); ?></dd>
                 </dl>
+                <p>
+                <a href="request_details.php?id=<?php echo (int) $request["request_id"]; ?>">
+                     View Details and Comments
+                    </a>
+                </p>
             </article>
         <?php endforeach; ?>
     <?php endif; ?>
