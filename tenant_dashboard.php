@@ -36,6 +36,7 @@ if (empty($_SESSION["logout_token"])) {
             <p> Your Maintenance Request will appear here.</p>
 
             <p><a href="profile.php">My Profile</a></p>
+            <p><a href="create_request.php">Create Maintenance Request</a></p>
 
             <form action="logout.php" method="POST">
             <input
