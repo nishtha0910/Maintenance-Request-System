@@ -204,7 +204,7 @@ if(empty($_SESSION["password_token"])){
 
 
 
-                <form action="change_password.php" method="post">
+                <form novalidate action="change_password.php" method="post">
                     <input
                      type="hidden"
                 name="token"

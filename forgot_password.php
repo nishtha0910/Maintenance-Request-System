@@ -253,7 +253,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
                </p>
 <?php endif; ?>
 
-            <form action="forgot_password.php" method="POST">
+            <form novalidate action="forgot_password.php" method="POST">
                 <input type="hidden" name="token"
                  value="<?php echo htmlspecialchars($_SESSION["reset_request_token"], ENT_QUOTES, 'UTF-8'); ?>">
                 <label for="email">Email Address</label>

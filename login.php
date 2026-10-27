@@ -295,7 +295,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <?php endif; ?>
 
 
-        <form action="login.php" method="post">
+      <form action="login.php" method="post" novalidate>
             <label for="email">Email:</label>
             <input type="email" id="email" name="email"   placeholder="Enter your email" autocomplete="username"  required>
             <label for="password">Password:</label>

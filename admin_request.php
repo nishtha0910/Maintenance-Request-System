@@ -253,7 +253,7 @@ function escapeHtml(string $value): string
                 <dd><?php echo escapeHtml($request["date_updated"]); ?></dd>
             </dl>
 
-            <form
+            <form novalidate
                 action="admin_request.php?id=<?php echo $requestId; ?>"
                 method="POST"
             >

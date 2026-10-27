@@ -204,7 +204,7 @@ try{
                     <?php endif; ?>
                     <?php if ($profile): ?>
                    
-                        <form action="EditProfile.php" method="post">
+                        <form novalidate action="EditProfile.php" method="post">
 
                         <input 
                         type="hidden"

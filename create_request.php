@@ -216,7 +216,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </div>
     <?php endif; ?>
 
-    <form action="create_request.php" method="POST">
+    <form novalidate action="create_request.php" method="POST">
         <input
             type="hidden"
             name="token"

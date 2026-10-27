@@ -197,7 +197,7 @@ if (!is_string($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
             Password reset successfully. You can now log in with your new password.
         </p>
     <?php elseif ($validLink): ?>
-        <form method="POST">
+        <form novalidate method="POST">
             <input type="hidden" name="form_token"
                    value="<?php echo htmlspecialchars(
                        $_SESSION["reset_password_token"],

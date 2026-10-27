@@ -77,7 +77,7 @@ try {
             if (
                 !is_string($token) ||
                 !hash_equals($_SESSION["comment_token"], $token)
-            ) {
+            ) { 
                 http_response_code(403);
                 $error = "Invalid security token. Refresh the page and try again.";
             } elseif (
@@ -311,7 +311,7 @@ function escapeHtml(string $value): string
                 <?php endforeach; ?>
             <?php endif; ?>
 
-            <form
+            <form novalidate
                 action="request_details.php?id=<?php echo $requestId; ?>"
                 method="POST"
             >

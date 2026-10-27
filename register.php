@@ -196,7 +196,7 @@ if($_SERVER["REQUEST_METHOD"]=="POST")
 
                 <?php endif; ?> 
 
-            <form action="register.php" method="post">
+                <form action="register.php" method="post" novalidate>
                 <label for="name">full Name</label>
                 <input type="text" 
                 name="name"
