@@ -1,0 +1,1 @@
+<footer class="site-footer"><span>Maintenance Request System</span><span>Thoughtful care. Better living.</span></footer>

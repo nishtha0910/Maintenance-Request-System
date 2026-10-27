@@ -167,77 +167,13 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title> Forgot Password </title>
 
-        <style>
-        * {
-            box-sizing: border-box;
-        }
+        
+    <link rel="stylesheet" href="assets/css/app.css?v=1">
+</head>
 
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-            background-color: #f1f5f9;
-            color: #1e293b;
-        }
-
-        .reset-box {
-            max-width: 420px;
-            margin: 40px auto;
-            padding: 30px;
-            background-color: white;
-            border-radius: 12px;
-        }
-
-        h1 {
-            font-size: 24px;
-            text-align: center;
-        }
-
-        p {
-            line-height: 1.5;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #64748b;
-            border-radius: 6px;
-            font: inherit;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            background-color: #1d4ed8;
-            color: white;
-            font: inherit;
-            cursor: pointer;
-        }
-
-        a {
-            color: #1d4ed8;
-        }
-
-        input:focus-visible,
-        button:focus-visible,
-        a:focus-visible {
-            outline: 3px solid #2563eb;
-            outline-offset: 3px;
-        }
-    </style>
-    </head>
-
-    <body>
-        <main class="reset-box">
+    <body class="auth-page">
+<?php require __DIR__ . "/includes/site_header.php"; ?>
+        <main id="main-content" class="reset-box">
             <h1>Forgot Password</h1>
             <p>Enter your email address below and we'll send you a link to reset your password.</p>
 
@@ -268,5 +204,6 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
 
             <p><a href="login.php">Back to Login</a></p>
         </main>
-    </body>
+    <?php require __DIR__ . "/includes/site_footer.php"; ?>
+</body>
 </html>

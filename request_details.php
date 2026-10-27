@@ -158,100 +158,12 @@ function escapeHtml(string $value): string
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maintenance Request Details</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-            background: #f1f5f9;
-            color: #1e293b;
-        }
-
-        main {
-            max-width: 750px;
-            margin: 30px auto;
-        }
-
-        section {
-            margin-top: 20px;
-            padding: 24px;
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 12px;
-            overflow-wrap: anywhere;
-        }
-
-        dt {
-            margin-top: 12px;
-            font-weight: bold;
-        }
-
-        dd {
-            margin: 4px 0 0;
-        }
-
-        .multiline {
-            white-space: pre-wrap;
-        }
-
-        .comment {
-            padding: 16px 0;
-            border-bottom: 1px solid #cbd5e1;
-        }
-
-        label {
-            display: block;
-            margin: 20px 0 8px;
-            font-weight: bold;
-        }
-
-        textarea {
-            width: 100%;
-            min-height: 120px;
-            padding: 12px;
-            border: 1px solid #64748b;
-            border-radius: 6px;
-            font: inherit;
-            resize: vertical;
-        }
-
-        button {
-            margin-top: 12px;
-            padding: 12px 20px;
-            background: #1d4ed8;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font: inherit;
-            cursor: pointer;
-        }
-
-        a {
-            color: #1d4ed8;
-        }
-
-        [role="alert"] {
-            color: #991b1b;
-        }
-
-        [role="status"] {
-            color: #166534;
-        }
-
-        a:focus-visible,
-        textarea:focus-visible,
-        button:focus-visible {
-            outline: 3px solid #2563eb;
-            outline-offset: 3px;
-        }
-    </style>
+    
+<link rel="stylesheet" href="assets/css/app.css?v=1">
 </head>
-<body>
-<main>
+<body class="request-list">
+<?php require __DIR__ . "/includes/site_header.php"; ?>
+<main id="main-content">
     <h1>Maintenance Request Details</h1>
     <a href="my_requests.php">Back to My Requests</a>
 
@@ -279,10 +191,10 @@ function escapeHtml(string $value): string
                 ?></dd>
 
                 <dt>Priority</dt>
-                <dd><?php echo escapeHtml($request["priority"]); ?></dd>
+                <dd><span class="badge badge-<?php echo escapeHtml(strtolower(str_replace(" ", "-", $request["priority"]))); ?>"><?php echo escapeHtml($request["priority"]); ?></span></dd>
 
                 <dt>Status</dt>
-                <dd><?php echo escapeHtml($request["status"]); ?></dd>
+                <dd><span class="badge badge-<?php echo escapeHtml(strtolower(str_replace(" ", "-", $request["status"]))); ?>"><?php echo escapeHtml($request["status"]); ?></span></dd>
 
                 <dt>Submitted (UTC)</dt>
                 <dd><?php echo escapeHtml($request["date_submitted"]); ?></dd>
@@ -334,5 +246,6 @@ function escapeHtml(string $value): string
         </section>
     <?php endif; ?>
 </main>
+<?php require __DIR__ . "/includes/site_footer.php"; ?>
 </body>
 </html>

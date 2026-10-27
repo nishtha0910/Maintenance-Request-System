@@ -138,52 +138,12 @@ if (!is_string($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reset Password</title>
-    <style>
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-            background: #f1f5f9;
-            color: #1e293b;
-        }
-        main {
-            max-width: 420px;
-            margin: 40px auto;
-            padding: 30px;
-            background: white;
-            border-radius: 12px;
-        }
-        h1 { text-align: center; }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #64748b;
-            border-radius: 6px;
-            font: inherit;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #1d4ed8;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font: inherit;
-            cursor: pointer;
-        }
-        a { color: #1d4ed8; }
-        p { line-height: 1.5; }
-    </style>
+    
+<link rel="stylesheet" href="assets/css/app.css?v=1">
 </head>
-<body>
-<main>
+<body class="auth-page">
+<?php require __DIR__ . "/includes/site_header.php"; ?>
+<main id="main-content">
     <h1>Reset Password</h1>
 
     <?php if ($error !== ""): ?>
@@ -223,5 +183,6 @@ if (!is_string($token) || !preg_match('/^[a-f0-9]{64}$/', $token)) {
     <p><a href="login.php">Back to Login</a></p>
     <p><a href="forgot_password.php">Request a new reset link</a></p>
 </main>
+<?php require __DIR__ . "/includes/site_footer.php"; ?>
 </body>
 </html>

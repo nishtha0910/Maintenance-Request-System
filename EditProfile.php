@@ -111,83 +111,14 @@ try{
          <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Edit Profile- Maintenance Request System</title>
 
-        <style>
-            body{
-                margin: 0;
-                padding: 20px;
-                font-family: Arial, sans-serif;
-                background-color: #f1f5f9;
-                color: #1e293b;
-            }
+        
+        <link rel="stylesheet" href="assets/css/app.css?v=1">
+</head>
 
-            .profile-box{
-                max-width: 420px;
-                margin: 40px auto;
-                padding: 30px;
-                background-color: white;
-                border-radius: 12px;
-            
-            }
+        <body class="form-page">
+<?php require __DIR__ . "/includes/site_header.php"; ?>
 
-            h1{
-                text-align: center;
-            }
-
-            dd{
-                margin: 6px 0 24px;
-                overflow-wrap: anywhere;
-            }
-
-            dt{
-                font-weight: bold;
-            }
-
-            * {
-             box-sizing: border-box;
-           }
-
-           label {
-             display: block;
-             margin-bottom: 6px;
-            font-weight: bold;
-        }
-
-           input {
-           width: 100%;
-           padding: 12px;
-           margin-bottom: 18px;
-           border: 1px solid #64748b;
-           border-radius: 6px;
-           font: inherit;
-        }
-
-         button {
-         width: 100%;
-         padding: 12px;
-         background-color: #1d4ed8;
-         color: white;
-         border: none;
-         border-radius: 6px;
-         font: inherit;
-        cursor: pointer;
-        }
- 
-        a {
-    color: #1d4ed8;
-        }
-
-      input:focus-visible,
-      button:focus-visible,
-      a:focus-visible {
-      outline: 3px solid #2563eb;
-      outline-offset: 3px;
-        }
-        </style>
-        </head>
-
-        <body>
-
-        <main class="profile-box">
+        <main id="main-content" class="profile-box">
             <h1>Edit Profile</h1>
             <?php if ($error !== ""): ?>
                 <p role="alert" >
@@ -254,5 +185,6 @@ try{
 
 <?php endif; ?>
  </main>
- </body>
+ <?php require __DIR__ . "/includes/site_footer.php"; ?>
+</body>
  </html>

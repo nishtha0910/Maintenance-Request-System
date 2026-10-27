@@ -113,88 +113,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Maintenance Request</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-            background: #f1f5f9;
-            color: #1e293b;
-        }
-
-        main {
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 30px;
-            background: white;
-            border-radius: 12px;
-        }
-
-        h1 {
-            font-size: 26px;
-        }
-
-        label {
-            display: block;
-            margin: 20px 0 8px;
-            font-weight: bold;
-        }
-
-        input,
-        textarea,
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #64748b;
-            border-radius: 6px;
-            font: inherit;
-        }
-
-        textarea {
-            min-height: 150px;
-            resize: vertical;
-        }
-
-        button {
-            margin-top: 24px;
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            background: #1d4ed8;
-            color: white;
-            font: inherit;
-            cursor: pointer;
-        }
-
-        a {
-            color: #1d4ed8;
-        }
-
-        .errors {
-            color: #991b1b;
-        }
-
-        [role="status"] {
-            color: #166534;
-        }
-
-        input:focus-visible,
-        textarea:focus-visible,
-        select:focus-visible,
-        button:focus-visible,
-        a:focus-visible {
-            outline: 3px solid #2563eb;
-            outline-offset: 3px;
-        }
-    </style>
+    
+<link rel="stylesheet" href="assets/css/app.css?v=1">
 </head>
-<body>
-<main>
+<body class="form-page">
+<?php require __DIR__ . "/includes/site_header.php"; ?>
+<main id="main-content">
     <h1>Create Maintenance Request</h1>
     <p>Describe the issue and select its initial priority. All fields are required.</p>
 
@@ -263,5 +187,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     <p><a href="tenant_dashboard.php">Back to Dashboard</a></p>
 </main>
+<?php require __DIR__ . "/includes/site_footer.php"; ?>
 </body>
 </html>

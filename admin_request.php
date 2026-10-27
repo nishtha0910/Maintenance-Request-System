@@ -143,80 +143,12 @@ function escapeHtml(string $value): string
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Maintenance Request</title>
 
-    <style>
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-            background: #f1f5f9;
-            color: #1e293b;
-        }
-
-        main {
-            max-width: 750px;
-            margin: 30px auto;
-        }
-
-        section {
-            margin-top: 20px;
-            padding: 24px;
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 12px;
-            overflow-wrap: anywhere;
-        }
-
-        dt, label {
-            display: block;
-            margin-top: 16px;
-            font-weight: bold;
-        }
-
-        dd { margin: 4px 0 0; }
-
-        .multiline { white-space: pre-wrap; }
-
-        select {
-            width: 100%;
-            margin-top: 8px;
-            padding: 12px;
-            border: 1px solid #64748b;
-            border-radius: 6px;
-            font: inherit;
-        }
-
-        button {
-            margin-top: 24px;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 6px;
-            background: #1d4ed8;
-            color: white;
-            font: inherit;
-            cursor: pointer;
-        }
-
-        .comment {
-            padding: 12px 0;
-            border-bottom: 1px solid #cbd5e1;
-        }
-
-        a { color: #1d4ed8; }
-        [role="alert"] { color: #991b1b; }
-        [role="status"] { color: #166534; }
-
-        a:focus-visible,
-        select:focus-visible,
-        button:focus-visible {
-            outline: 3px solid #2563eb;
-            outline-offset: 3px;
-        }
-    </style>
+    
+<link rel="stylesheet" href="assets/css/app.css?v=1">
 </head>
-<body>
-<main>
+<body class="request-list">
+<?php require __DIR__ . "/includes/site_header.php"; ?>
+<main id="main-content">
     <h1>Manage Maintenance Request</h1>
     <a href="admin_dashboard.php">Back to Dashboard</a>
 
@@ -312,6 +244,7 @@ function escapeHtml(string $value): string
         </section>
     <?php endif; ?>
 </main>
+<?php require __DIR__ . "/includes/site_footer.php"; ?>
 </body>
 </html>
 

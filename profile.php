@@ -51,42 +51,14 @@ try{
          <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>User Profile- Maintenance Request System</title>
 
-        <style>
-            body{
-                margin: 0;
-                padding: 20px;
-                font-family: Arial, sans-serif;
-                background-color: #f1f5f9;
-                color: #1e293b;
-            }
+        
+        <link rel="stylesheet" href="assets/css/app.css?v=1">
+</head>
 
-            .profile-box{
-                max-width: 420px;
-                margin: 40px auto;
-                padding: 30px;
-                background-color: white;
-                border-radius: 12px;
-            
-            }
+        <body class="profile-page">
+<?php require __DIR__ . "/includes/site_header.php"; ?>
 
-            h1{
-                text-align: center;
-            }
-
-            dd{
-                margin: 6px 0 24px;
-                overflow-wrap: anywhere;
-            }
-
-            dt{
-                font-weight: bold;
-            }
-        </style>
-        </head>
-
-        <body>
-
-        <main class="profile-box">
+        <main id="main-content" class="profile-box">
             <h1>My Profile</h1>
             <?php if ($error !== ""): ?>
                 <p role="alert" >
@@ -111,5 +83,6 @@ try{
                      <?php endif; ?>
 
         </main>
-         </body>
+         <?php require __DIR__ . "/includes/site_footer.php"; ?>
+</body>
      </html>

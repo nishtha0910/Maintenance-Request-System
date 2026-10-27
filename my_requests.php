@@ -57,74 +57,12 @@ function escapeHtml(string $value): string
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Maintenance Requests</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-            background: #f1f5f9;
-            color: #1e293b;
-        }
-
-        main {
-            max-width: 850px;
-            margin: 30px auto;
-        }
-
-        nav {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        a {
-            color: #1d4ed8;
-        }
-
-        a:focus-visible {
-            outline: 3px solid #2563eb;
-            outline-offset: 3px;
-        }
-
-        article {
-            margin-bottom: 20px;
-            padding: 24px;
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 12px;
-            overflow-wrap: anywhere;
-        }
-
-        h2 {
-            margin-top: 0;
-            font-size: 21px;
-        }
-
-        dt {
-            margin-top: 12px;
-            font-weight: bold;
-        }
-
-        dd {
-            margin: 4px 0 0;
-        }
-
-        .description {
-            white-space: pre-wrap;
-        }
-
-        [role="alert"] {
-            color: #991b1b;
-        }
-    </style>
+    
+<link rel="stylesheet" href="assets/css/app.css?v=1">
 </head>
-<body>
-<main>
+<body class="request-list">
+<?php require __DIR__ . "/includes/site_header.php"; ?>
+<main id="main-content">
     <h1>My Maintenance Requests</h1>
 
     <nav aria-label="Request navigation">
@@ -153,10 +91,10 @@ function escapeHtml(string $value): string
                     ?></dd>
 
                     <dt>Priority</dt>
-                    <dd><?php echo escapeHtml($request["priority"]); ?></dd>
+                    <dd><span class="badge badge-<?php echo escapeHtml(strtolower(str_replace(" ", "-", $request["priority"]))); ?>"><?php echo escapeHtml($request["priority"]); ?></span></dd>
 
                     <dt>Status</dt>
-                    <dd><?php echo escapeHtml($request["status"]); ?></dd>
+                    <dd><span class="badge badge-<?php echo escapeHtml(strtolower(str_replace(" ", "-", $request["status"]))); ?>"><?php echo escapeHtml($request["status"]); ?></span></dd>
 
                     <dt>Submitted (UTC)</dt>
                     <dd><?php echo escapeHtml($request["date_submitted"]); ?></dd>
@@ -173,5 +111,6 @@ function escapeHtml(string $value): string
         <?php endforeach; ?>
     <?php endif; ?>
 </main>
+<?php require __DIR__ . "/includes/site_footer.php"; ?>
 </body>
 </html>

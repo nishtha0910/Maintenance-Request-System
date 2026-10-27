@@ -59,86 +59,12 @@ function escapeHtml(string $value): string
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Maintenance Request System</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-            background: #f1f5f9;
-            color: #1e293b;
-        }
-
-        main {
-            max-width: 950px;
-            margin: 30px auto;
-        }
-
-        nav {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        a {
-            color: #1d4ed8;
-        }
-
-        button {
-            padding: 10px 18px;
-            border: none;
-            border-radius: 6px;
-            background: #1d4ed8;
-            color: white;
-            font: inherit;
-            cursor: pointer;
-        }
-
-        article {
-            margin-bottom: 20px;
-            padding: 24px;
-            border: 1px solid #cbd5e1;
-            border-radius: 12px;
-            background: white;
-            overflow-wrap: anywhere;
-        }
-
-        h3 {
-            margin-top: 0;
-            font-size: 21px;
-        }
-
-        dt {
-            margin-top: 12px;
-            font-weight: bold;
-        }
-
-        dd {
-            margin: 4px 0 0;
-        }
-
-        .description {
-            white-space: pre-wrap;
-        }
-
-        [role="alert"] {
-            color: #991b1b;
-        }
-
-        a:focus-visible,
-        button:focus-visible {
-            outline: 3px solid #2563eb;
-            outline-offset: 3px;
-        }
-    </style>
+    
+<link rel="stylesheet" href="assets/css/app.css?v=1">
 </head>
-<body>
-<main>
+<body class="request-list">
+<?php require __DIR__ . "/includes/site_header.php"; ?>
+<main id="main-content">
     <h1>Admin Dashboard</h1>
 
     <p>
@@ -146,18 +72,7 @@ function escapeHtml(string $value): string
         <?php echo escapeHtml($_SESSION["name"] ?? "Administrator"); ?>!
     </p>
 
-    <nav aria-label="Account navigation">
-        <a href="profile.php">My Profile</a>
-
-        <form action="logout.php" method="POST">
-            <input
-                type="hidden"
-                name="token"
-                value="<?php echo escapeHtml($_SESSION["logout_token"]); ?>"
-            >
-            <button type="submit">Logout</button>
-        </form>
-    </nav>
+    
 
     <h2>All Maintenance Requests</h2>
 
@@ -185,10 +100,10 @@ function escapeHtml(string $value): string
                     ?></dd>
 
                     <dt>Priority</dt>
-                    <dd><?php echo escapeHtml($request["priority"]); ?></dd>
+                    <dd><span class="badge badge-<?php echo escapeHtml(strtolower(str_replace(" ", "-", $request["priority"]))); ?>"><?php echo escapeHtml($request["priority"]); ?></span></dd>
 
                     <dt>Status</dt>
-                    <dd><?php echo escapeHtml($request["status"]); ?></dd>
+                    <dd><span class="badge badge-<?php echo escapeHtml(strtolower(str_replace(" ", "-", $request["status"]))); ?>"><?php echo escapeHtml($request["status"]); ?></span></dd>
 
                     <dt>Submitted (UTC)</dt>
                     <dd><?php echo escapeHtml($request["date_submitted"]); ?></dd>
@@ -206,5 +121,6 @@ function escapeHtml(string $value): string
         <?php endforeach; ?>
     <?php endif; ?>
 </main>
+<?php require __DIR__ . "/includes/site_footer.php"; ?>
 </body>
 </html>
