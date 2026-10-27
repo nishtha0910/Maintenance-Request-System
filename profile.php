@@ -66,7 +66,10 @@ try{
                 </p>
 
                 <?php elseif ($profile): ?>
-                    <dl>
+                    <div class="profile-avatar" aria-label="Profile avatar">
+                        <svg aria-hidden="true" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"><circle cx="32" cy="23" r="10"/><path d="M13 54c0-11 8-18 19-18s19 7 19 18"/></svg>
+                    </div>
+                    <dl class="profile-details">
                         <dt>Name:</dt>
                         <dd><?php echo htmlspecialchars($profile["name"], ENT_QUOTES, 'UTF-8'); ?></dd>
 
@@ -77,8 +80,14 @@ try{
                         <dd><?php echo htmlspecialchars($profile["role"], ENT_QUOTES, 'UTF-8'); ?></dd>
                     </dl>
 
-                    <p><a href="EditProfile.php">Edit Profile</a></p>
-                    <p><a href="change_password.php">Change Password</a></p>
+                    <div class="profile-actions">
+                        <a class="button" href="EditProfile.php">Edit Profile</a>
+                        <a class="button button-outline" href="change_password.php">Change Password</a>
+                        <form action="logout.php" method="POST">
+                            <input type="hidden" name="token" value="<?php echo htmlspecialchars($_SESSION['logout_token'], ENT_QUOTES, 'UTF-8'); ?>">
+                            <button class="button-outline" type="submit">Logout</button>
+                        </form>
+                    </div>
 
                      <?php endif; ?>
 

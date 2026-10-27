@@ -205,9 +205,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <p> Enter your credentials to log in.</p>
 
         <?php if ($error): ?>
-            <p role="alert">
-                <?php echo htmlspecialchars($error , ENT_QUOTES, 'UTF-8'); ?>
-            </p>
+            <div class="login-error" role="alert" aria-labelledby="login-error-heading">
+                <h3 id="login-error-heading">Login Failed</h3>
+                <p><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></p>
+            </div>
             <?php endif; ?>
                 <?php if ($success !==""): ?>
             <p role="alert">
@@ -221,8 +222,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <input type="email" id="email" name="email"   placeholder="Enter your email" autocomplete="username"  required>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" placeholder="Enter your password"  autocomplete="current-password"  required>
-            <button type="submit">Login</button>
+            <button type="submit"><?php echo $error !== "" ? "Try Again" : "Login"; ?></button>
         </form>
+        <?php if ($error !== ""): ?>
+            <p class="login-link"><a href="login.php">Back to Login</a></p>
+        <?php endif; ?>
         <p class="login-link">
         <a href="forgot_password.php">Forgot Password?</a></p>
         <div class="login-link">

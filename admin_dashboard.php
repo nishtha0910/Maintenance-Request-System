@@ -66,59 +66,39 @@ function escapeHtml(string $value): string
 <?php require __DIR__ . "/includes/site_header.php"; ?>
 <main id="main-content">
     <h1>Admin Dashboard</h1>
-
-    <p>
-        Welcome,
-        <?php echo escapeHtml($_SESSION["name"] ?? "Administrator"); ?>!
-    </p>
-
-    
-
-    <h2>All Maintenance Requests</h2>
-
+    <p>Manage all maintenance requests.</p>
     <?php if ($error !== ""): ?>
         <p role="alert"><?php echo escapeHtml($error); ?></p>
-
     <?php elseif (!$requests): ?>
-        <p>No maintenance requests have been submitted yet.</p>
-
+        <div class="empty-state">No maintenance requests have been submitted yet.</div>
     <?php else: ?>
-        <?php foreach ($requests as $request): ?>
-            <article>
-                <h3><?php echo escapeHtml($request["title"]); ?></h3>
-
-                <dl>
-                    <dt>Request ID</dt>
-                    <dd><?php echo (int) $request["request_id"]; ?></dd>
-
-                    <dt>Submitted By</dt>
-                    <dd><?php echo escapeHtml($request["tenant_name"]); ?></dd>
-
-                    <dt>Description</dt>
-                    <dd class="description"><?php
-                        echo escapeHtml($request["description"]);
-                    ?></dd>
-
-                    <dt>Priority</dt>
-                    <dd><span class="badge badge-<?php echo escapeHtml(strtolower(str_replace(" ", "-", $request["priority"]))); ?>"><?php echo escapeHtml($request["priority"]); ?></span></dd>
-
-                    <dt>Status</dt>
-                    <dd><span class="badge badge-<?php echo escapeHtml(strtolower(str_replace(" ", "-", $request["status"]))); ?>"><?php echo escapeHtml($request["status"]); ?></span></dd>
-
-                    <dt>Submitted (UTC)</dt>
-                    <dd><?php echo escapeHtml($request["date_submitted"]); ?></dd>
-
-                    <dt>Last Updated (UTC)</dt>
-                    <dd><?php echo escapeHtml($request["date_updated"]); ?></dd>
-                </dl>
-
-                <p>
-    <a href="admin_request.php?id=<?php echo (int) $request["request_id"]; ?>">
-        Manage Request
-    </a>
-</p>
-            </article>
-        <?php endforeach; ?>
+        <div class="table-panel">
+            <table class="admin-table">
+                <caption>All Maintenance Requests — most recent first</caption>
+                <thead><tr>
+                    <th scope="col">Title</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Priority</th>
+                    <th scope="col">Actions</th>
+                </tr></thead>
+                <tbody>
+                <?php foreach ($requests as $request): ?>
+                    <tr>
+                        <td>
+                            <strong><?php echo escapeHtml($request['title']); ?></strong>
+                            <small class="request-owner">#<?php echo (int) $request['request_id']; ?> · <?php echo escapeHtml($request['tenant_name']); ?></small>
+                        </td>
+                        <td><span class="badge badge-<?php echo escapeHtml(strtolower(str_replace(' ', '-', $request['status']))); ?>"><?php echo escapeHtml($request['status']); ?></span></td>
+                        <td><span class="badge badge-<?php echo escapeHtml(strtolower($request['priority'])); ?>"><?php echo escapeHtml($request['priority']); ?></span></td>
+                        <td><div class="table-actions">
+                            <a class="button button-outline" href="admin_request.php?id=<?php echo (int) $request['request_id']; ?>#request-heading" aria-label="View request <?php echo (int) $request['request_id']; ?>">View</a>
+                            <a class="button" href="admin_request.php?id=<?php echo (int) $request['request_id']; ?>#update-request" aria-label="Edit request <?php echo (int) $request['request_id']; ?>">Edit</a>
+                        </div></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     <?php endif; ?>
 </main>
 <?php require __DIR__ . "/includes/site_footer.php"; ?>
