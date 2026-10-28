@@ -17,6 +17,9 @@ if (empty($_SESSION["logout_token"])) {
     $_SESSION["logout_token"] = bin2hex(random_bytes(32));
 }
 
+$success = isset($_SESSION["updated_request_id"]) ? "Request updated successfully." : "";
+unset($_SESSION["updated_request_id"]);
+
 $error = "";
 $requests = [];
 
@@ -67,6 +70,9 @@ function escapeHtml(string $value): string
 <main id="main-content">
     <h1>Admin Dashboard</h1>
     <p>Manage all maintenance requests.</p>
+    <?php if ($success !== ""): ?>
+        <p role="status"><?php echo escapeHtml($success); ?></p>
+    <?php endif; ?>
     <?php if ($error !== ""): ?>
         <p role="alert"><?php echo escapeHtml($error); ?></p>
     <?php elseif (!$requests): ?>
@@ -74,7 +80,7 @@ function escapeHtml(string $value): string
     <?php else: ?>
         <div class="table-panel">
             <table class="admin-table">
-                <caption>All Maintenance Requests — most recent first</caption>
+                <caption>All Maintenance Requests ï¿½ most recent first</caption>
                 <thead><tr>
                     <th scope="col">Title</th>
                     <th scope="col">Status</th>
@@ -86,7 +92,7 @@ function escapeHtml(string $value): string
                     <tr>
                         <td>
                             <strong><?php echo escapeHtml($request['title']); ?></strong>
-                            <small class="request-owner">#<?php echo (int) $request['request_id']; ?> · <?php echo escapeHtml($request['tenant_name']); ?></small>
+                            <small class="request-owner">#<?php echo (int) $request['request_id']; ?> ï¿½ <?php echo escapeHtml($request['tenant_name']); ?></small>
                         </td>
                         <td><span class="badge badge-<?php echo escapeHtml(strtolower(str_replace(' ', '-', $request['status']))); ?>"><?php echo escapeHtml($request['status']); ?></span></td>
                         <td><span class="badge badge-<?php echo escapeHtml(strtolower($request['priority'])); ?>"><?php echo escapeHtml($request['priority']); ?></span></td>

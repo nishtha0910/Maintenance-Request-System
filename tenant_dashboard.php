@@ -17,6 +17,9 @@ if (empty($_SESSION["logout_token"])) {
     $_SESSION["logout_token"] = bin2hex(random_bytes(32));
 }
 
+$success = $_SESSION["request_success"] ?? "";
+unset($_SESSION["request_success"]);
+
 $error = "";
 $requests = [];
 
@@ -70,6 +73,9 @@ function escapeHtml(string $value): string
         <main id="main-content">
 <div class="dashboard-intro"><p class="eyebrow">Your resident workspace</p><h1>Tenant Dashboard</h1>
 <p>Welcome, <?php echo escapeHtml($_SESSION['name'] ?? 'Resident'); ?>. Let's keep your home at its best.</p></div>
+<?php if ($success !== ""): ?>
+<p role="status"><?php echo escapeHtml($success); ?></p>
+<?php endif; ?>
 <div class="page-heading"><h2>Maintenance Requests</h2><a class="button" href="create_request.php">+ Create New Request</a></div>
 <?php if ($error !== ''): ?><p role="alert"><?php echo escapeHtml($error); ?></p>
 <?php elseif (!$requests): ?><div class="empty-state"><h3>A fresh start.</h3><p>No maintenance requests yet. When something needs attention, create your first request.</p></div>

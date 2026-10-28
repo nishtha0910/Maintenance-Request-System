@@ -1,4 +1,5 @@
 <?php
+session_start();
 
 require_once __DIR__ . "/includes/auth.php"; 
 $error="";
@@ -65,7 +66,10 @@ if($_SERVER["REQUEST_METHOD"]=="POST")
                 $insert->bind_param("ssss", $name, $email, $hashed_password, $role);
                 $insert->execute();
                 $insert->close();
-                $success="Account created successfully. You can now log in.";
+                $check->close();
+                $_SESSION["registration_success"] = "Account created successfully. You can now log in.";
+                header("Location: login.php", true, 303);
+                exit;
             }
 
                $check->close();

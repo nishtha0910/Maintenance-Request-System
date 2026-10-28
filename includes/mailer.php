@@ -3,17 +3,24 @@
 use PHPMailer\PHPMailer\PHPMailer;
 
 require_once __DIR__ . "/../vendor/autoload.php";
-require_once __DIR__ . "/../includes/mailer.php";
+
 
 function sendEmail(
     string $recipient,
     string $subject,
     string $message
 ): void{
-    $settings = require __DIR__ . "/../config/mail.local.php";
-    $mail = new PHPMailer();
+    if (getenv('VERCEL') || getenv('APP_ENV') === 'production') {
+        $settings = ['email' => getenv('SMTP_USER'), 'app_password' => getenv('SMTP_PASSWORD')];
+        if (!$settings['email'] || !$settings['app_password']) {
+            throw new RuntimeException('Email configuration is missing.');
+        }
+    } else {
+        $settings = require __DIR__ . "/../config/mail.local.php";
+    }
+    $mail = new PHPMailer(true);
     $mail->isSMTP();
-    $mail->Host = "smtp.gmail.com";
+    $mail->Host = getenv("SMTP_HOST") ?: "smtp.gmail.com";
     $mail->SMTPAuth = true;
     $mail->Username = $settings["email"];
     $mail->Password = $settings["app_password"];

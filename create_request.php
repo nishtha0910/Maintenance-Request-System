@@ -23,8 +23,7 @@ $title = "";
 $description = "";
 $priority = "Medium";
 
-$success = $_SESSION["request_success"] ?? "";
-unset($_SESSION["request_success"]);
+
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $token = $_POST["token"] ?? "";
@@ -90,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "Maintenance request submitted successfully.";
 
                 // Redirect so refreshing does not repeat the submission.
-                header("Location: create_request.php", true, 303);
+                header("Location: tenant_dashboard.php", true, 303);
                 exit;
             } catch (mysqli_sql_exception $exception) {
                 error_log(
@@ -122,11 +121,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <h1>Create Maintenance Request</h1>
     <p>Describe the issue and select its initial priority. All fields are required.</p>
 
-    <?php if ($success !== ""): ?>
-        <p role="status">
-            <?php echo htmlspecialchars($success, ENT_QUOTES, "UTF-8"); ?>
-        </p>
-    <?php endif; ?>
+    
 
     <?php if ($errors): ?>
         <div role="alert" class="errors">

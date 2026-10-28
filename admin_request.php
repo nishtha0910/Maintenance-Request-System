@@ -34,14 +34,11 @@ $requestId = is_string($rawId)
     $allowedPriorities = ["Low", "Medium", "High"];
 
     $error = "";
-    $success = "";
+
     $request = null;
     $comments = [];
 
-    if(($_SESSION["updated_request_id"] ?? null) === $requestId) {
-    $success = "Request updated successfully.";
-    unset($_SESSION["updated_request_id"]);
-     }
+    
     
      try {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -102,7 +99,7 @@ $requestId = is_string($rawId)
                 $_SESSION["updated_request_id"] = $requestId;
 
                 header(
-                    "Location: admin_request.php?id=" . $requestId,
+                    "Location: admin_dashboard.php",
                     true,
                     303
                 );
@@ -157,9 +154,7 @@ function escapeHtml(string $value): string
     <?php endif; ?>
 
     <?php if ($request): ?>
-        <?php if ($success !== ""): ?>
-            <p role="status"><?php echo escapeHtml($success); ?></p>
-        <?php endif; ?>
+        
 
         <section aria-labelledby="request-heading">
             <h2 id="request-heading">

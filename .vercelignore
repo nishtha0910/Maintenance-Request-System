@@ -1,0 +1,10 @@
+.git
+vendor
+tests
+database
+scripts
+config/mail.local.php
+.env
+.env.*
+*.sql
+*.md

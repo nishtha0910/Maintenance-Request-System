@@ -4,7 +4,8 @@ session_start();
 require_once __DIR__ . "/includes/login_security.php";
 
 $error = "";
-$success = "";
+$success = $_SESSION["registration_success"] ?? "";
+unset($_SESSION["registration_success"]);
 $transactionStarted = false;
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -211,7 +212,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </div>
             <?php endif; ?>
                 <?php if ($success !==""): ?>
-            <p role="alert">
+            <p role="status">
                 <?php echo htmlspecialchars($success , ENT_QUOTES, 'UTF-8'); ?>
                 </p>
                 <?php endif; ?>

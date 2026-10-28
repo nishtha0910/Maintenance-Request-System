@@ -105,9 +105,12 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
                 $transactionStarted = false;
 
                                if ($sendLink) {
-                    $resetLink =
-                        "http://localhost/maintenance-request-system/reset_password.php"
-                        . "?token=" . urlencode($resetToken);
+                    $baseUrl = getenv('APP_URL');
+                    if (!$baseUrl && (getenv('VERCEL') || getenv('APP_ENV') === 'production')) {
+                        throw new RuntimeException('APP_URL is required for password reset links.');
+                    }
+                    $baseUrl = $baseUrl ?: 'http://localhost/maintenance-request-system';
+                    $resetLink = rtrim($baseUrl, '/') . '/reset_password.php?token=' . urlencode($resetToken);
 
                     $safeLink = htmlspecialchars(
                         $resetLink,
