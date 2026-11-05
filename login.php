@@ -194,13 +194,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Maintenance Request System</title>
 
-    
-
 <link rel="stylesheet" href="assets/css/app.css?v=1">
 </head>
 <body class="auth-page">
 <?php require __DIR__ . "/includes/site_header.php"; ?>
-    <main id="main-content">
+    <main id="main-content" class="login-box">
         <h1>Maintenance Request System</h1>
         <h2>Login</h2>
         <p> Enter your credentials to log in.</p>
