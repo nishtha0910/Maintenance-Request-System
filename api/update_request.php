@@ -77,8 +77,8 @@ if (!$data instanceof stdClass) {
 
 $fields = get_object_vars($data);
 
-if (array_diff(array_keys($fields), ["status", "priority"])) {
-    respond(400, ["error" => "Only status and priority are accepted."]);
+if (array_diff(array_keys($fields), ["status", "priority", "resolution_notes"])) {
+    respond(400, ["error" => "Only status, priority, and resolution_notes are accepted."]);
 }
 
 $status = $fields["status"] ?? "";
@@ -95,6 +95,18 @@ if (
     ]);
 }
 
+$hasResolutionNotes = array_key_exists("resolution_notes", $fields);
+$resolutionNotes = null;
+if ($hasResolutionNotes) {
+    if (!is_string($fields["resolution_notes"])) {
+        respond(422, ["error" => "Resolution notes must be text."]);
+    }
+    $resolutionNotes = trim($fields["resolution_notes"]);
+    if (mb_strlen($resolutionNotes, "UTF-8") > 5000) {
+        respond(422, ["error" => "Resolution notes must not exceed 5,000 characters."]);
+    }
+}
+
 $transactionStarted = false;
 
 try {
@@ -107,7 +119,7 @@ try {
 
     // Lock the request while checking and updating it.
     $check = $conn->prepare(
-        "SELECT request_id
+        "SELECT request_id, resolution_notes
          FROM maintenance_requests
          WHERE request_id = ?
          FOR UPDATE"
@@ -123,18 +135,23 @@ try {
 
         respond(404, ["error" => "Request not found."]);
     }
-     // Completed requests can also be updated by administrators.
+    // Omitted notes must not erase the existing value.
+    if (!$hasResolutionNotes) {
+        $resolutionNotes = $existingRequest["resolution_notes"];
+    }
+
+    // Completed requests can also be updated by administrators.
     $update = $conn->prepare(
         "UPDATE maintenance_requests
-         SET status = ?, priority = ?, date_updated = UTC_TIMESTAMP()
+         SET status = ?, priority = ?, resolution_notes = ?, date_updated = UTC_TIMESTAMP()
          WHERE request_id = ?"
     );
-    $update->bind_param("ssi", $status, $priority, $requestId);
+    $update->bind_param("sssi", $status, $priority, $resolutionNotes, $requestId);
     $update->execute();
     $update->close();
 
     $read = $conn->prepare(
-        "SELECT request_id, title, description, priority, status,
+        "SELECT request_id, title, description, priority, status, resolution_notes,
                 date_submitted, date_updated
          FROM maintenance_requests
          WHERE request_id = ?"
