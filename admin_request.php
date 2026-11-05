@@ -37,6 +37,10 @@ $requestId = is_string($rawId)
         $_SESSION["admin_request_token"] = bin2hex(random_bytes(32));
     }
 
+    if ($isEditMode && empty($_SESSION["profile_token"])) {
+        $_SESSION["profile_token"] = bin2hex(random_bytes(32));
+    }
+
     $allowedStatuses = ["Submitted", "In Progress", "Completed"];
     $allowedPriorities = ["Low", "Medium", "High"];
 
@@ -251,6 +255,35 @@ function escapeHtml(string $value): string
 
                 <button type="submit">Save Changes</button>
             </form>
+
+            <button type="button" id="delete-request"
+                data-id="<?= (int) $requestId ?>"
+                data-token="<?= escapeHtml($_SESSION["profile_token"]) ?>">Delete Request</button>
+            <p id="delete-error" role="alert"></p>
+            <script>
+            document.getElementById("delete-request").addEventListener("click", async function () {
+                const title = document.getElementById("request-heading").textContent.trim();
+                if (!window.confirm("Permanently delete request #" + this.dataset.id + " (" + title + ") and its comments?")) return;
+
+                this.disabled = true;
+                const error = document.getElementById("delete-error");
+                error.textContent = "";
+                try {
+                    const response = await fetch("api/delete_request.php?id=" + this.dataset.id, {
+                        method: "DELETE",
+                        headers: {"X-CSRF-Token": this.dataset.token}
+                    });
+                    const result = await response.json();
+                    if (!response.ok || result.request_id !== Number(this.dataset.id)) {
+                        throw new Error(result.error || "Deletion could not be confirmed. Refresh the page to check.");
+                    }
+                    window.location.assign("admin_dashboard.php");
+                } catch (problem) {
+                    error.textContent = problem.message;
+                    this.disabled = false;
+                }
+            });
+            </script>
             <?php endif; ?>
 
         </section>
