@@ -12,6 +12,13 @@ if (!canAccessRole($_SESSION, "admin")) {
     exit("Access denied.");
 }
 
+$isEditMode = ($_GET["mode"] ?? "view") === "edit";
+if ($_SERVER["REQUEST_METHOD"] === "POST" && !$isEditMode) {
+    header("Allow: GET");
+    http_response_code(405);
+    exit("Use the Edit page to save changes.");
+}
+
 $rawId = $_GET["id"] ?? "";
 
 $requestId = is_string($rawId)
@@ -47,7 +54,8 @@ $requestId = is_string($rawId)
 
         $check= $conn->prepare(
               "SELECT r.request_id, r.title, r.description,
-                r.priority, r.status, r.date_submitted, r.date_updated,
+                r.priority, r.status, r.resolution_notes,
+                r.date_submitted, r.date_updated,
                 u.name AS tenant_name
          FROM maintenance_requests AS r
          INNER JOIN users AS u ON u.user_id = r.user_id
@@ -66,11 +74,15 @@ $requestId = is_string($rawId)
     } else {
         $selectedStatus = $request["status"];
         $selectedPriority = $request["priority"];
+        $resolutionNotes = $request["resolution_notes"] ?? "";
 
         if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $token = $_POST["token"] ?? "";
             $status = $_POST["status"] ?? "";
             $priority = $_POST["priority"] ?? "";
+            $rawNotes = $_POST["resolution_notes"] ?? "";
+            $resolutionNotes = is_string($rawNotes) ? trim($rawNotes) : "";
+            
 
             if (
                 !is_string($token) ||
@@ -86,13 +98,16 @@ $requestId = is_string($rawId)
             ) {
                 http_response_code(422);
                 $error = "Select a valid status and priority.";
+            } elseif (!is_string($rawNotes) || mb_strlen($resolutionNotes, "UTF-8") > 5000) {
+                http_response_code(422);
+                $error = "Resolution notes must be text of no more than 5,000 characters.";
             } else {
                 $update = $conn->prepare(
                     "UPDATE maintenance_requests
-                     SET status = ?, priority = ?, date_updated = UTC_TIMESTAMP()
+                     SET status = ?, priority = ?, resolution_notes = ?, date_updated = UTC_TIMESTAMP()
                      WHERE request_id = ?"
                 );
-                $update->bind_param("ssi", $status, $priority, $requestId);
+                $update->bind_param("sssi", $status, $priority, $resolutionNotes, $requestId);
                 $update->execute();
                 $update->close();
 
@@ -138,7 +153,7 @@ function escapeHtml(string $value): string
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Maintenance Request</title>
+    <title><?php echo $isEditMode ? "Edit" : "View"; ?> Maintenance Request</title>
 
     
 <link rel="stylesheet" href="assets/css/app.css?v=1">
@@ -146,7 +161,7 @@ function escapeHtml(string $value): string
 <body class="request-list">
 <?php require __DIR__ . "/includes/site_header.php"; ?>
 <main id="main-content">
-    <h1>Manage Maintenance Request</h1>
+    <h1><?php echo $isEditMode ? "Edit" : "View"; ?> Maintenance Request</h1>
     <a href="admin_dashboard.php">Back to Dashboard</a>
 
     <?php if ($error !== ""): ?>
@@ -180,8 +195,19 @@ function escapeHtml(string $value): string
                 <dd><?php echo escapeHtml($request["date_updated"]); ?></dd>
             </dl>
 
+            <?php if (!$isEditMode): ?>
+            <dl>
+                <dt>Status</dt>
+                <dd><?php echo escapeHtml($request["status"]); ?></dd>
+                <dt>Priority</dt>
+                <dd><?php echo escapeHtml($request["priority"]); ?></dd>
+                <dt>Resolution Notes</dt>
+                <dd class="multiline"><?php echo escapeHtml($resolutionNotes !== "" ? $resolutionNotes : "No resolution notes yet."); ?></dd>
+            </dl>
+            <a class="button" href="admin_request.php?id=<?php echo $requestId; ?>&amp;mode=edit">Edit Request</a>
+            <?php else: ?>
             <form id="update-request" novalidate
-                action="admin_request.php?id=<?php echo $requestId; ?>"
+                action="admin_request.php?id=<?php echo $requestId; ?>&amp;mode=edit"
                 method="POST"
             >
                 <input
@@ -203,6 +229,7 @@ function escapeHtml(string $value): string
                 </select>
 
                 <label for="priority">Priority</label>
+                
                 <select id="priority" name="priority" required>
                     <?php foreach ($allowedPriorities as $option): ?>
                         <option
@@ -214,8 +241,18 @@ function escapeHtml(string $value): string
                     <?php endforeach; ?>
                 </select>
 
+                <label for="resolution_notes">Resolution Notes (optional)</label>
+                    <textarea
+                       id="resolution_notes"
+                       name="resolution_notes"
+                       rows="5"
+                       maxlength="5000"
+                      ><?php echo escapeHtml($resolutionNotes); ?></textarea>
+
                 <button type="submit">Save Changes</button>
             </form>
+            <?php endif; ?>
+
         </section>
 
         <section aria-labelledby="comments-heading">

@@ -98,7 +98,7 @@ function escapeHtml(string $value): string
                         <td><span class="badge badge-<?php echo escapeHtml(strtolower($request['priority'])); ?>"><?php echo escapeHtml($request['priority']); ?></span></td>
                         <td><div class="table-actions">
                             <a class="button button-outline" href="admin_request.php?id=<?php echo (int) $request['request_id']; ?>#request-heading" aria-label="View request <?php echo (int) $request['request_id']; ?>">View</a>
-                            <a class="button" href="admin_request.php?id=<?php echo (int) $request['request_id']; ?>#update-request" aria-label="Edit request <?php echo (int) $request['request_id']; ?>">Edit</a>
+                            <a class="button" href="admin_request.php?id=<?php echo (int) $request['request_id']; ?>&amp;mode=edit#update-request" aria-label="Edit request <?php echo (int) $request['request_id']; ?>">Edit</a>
                         </div></td>
                     </tr>
                 <?php endforeach; ?>
