@@ -52,7 +52,7 @@ try {
 
     // Check ownership before displaying or accepting comments.
     $check = $conn->prepare(
-        "SELECT request_id, title, description, priority, status,
+        "SELECT request_id, title, description, priority, status, resolution_notes,
                 date_submitted, date_updated
          FROM maintenance_requests
          WHERE request_id = ? AND user_id = ?"
@@ -195,6 +195,12 @@ function escapeHtml(string $value): string
 
                 <dt>Status</dt>
                 <dd><span class="badge badge-<?php echo escapeHtml(strtolower(str_replace(" ", "-", $request["status"]))); ?>"><?php echo escapeHtml($request["status"]); ?></span></dd>
+
+                <dt>Resolution Notes</dt>
+                <dd class="multiline"><?php
+                    $resolutionNotes = $request["resolution_notes"] ?? "";
+                    echo escapeHtml($resolutionNotes !== "" ? $resolutionNotes : "No resolution notes yet.");
+                ?></dd>
 
                 <dt>Submitted (UTC)</dt>
                 <dd><?php echo escapeHtml($request["date_submitted"]); ?></dd>
