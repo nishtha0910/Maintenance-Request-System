@@ -3,6 +3,7 @@ session_start();
 
 require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/includes/request_validation.php";
+require_once __DIR__ . "/includes/request_submission.php";
 
 if (!isset($_SESSION["user_id"])) {
     header("Location: login.php");
@@ -64,26 +65,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 // Ownership and initial status come from the server.
                 $userId = (int) $_SESSION["user_id"];
-                $status = "Submitted";
 
-                $insert = $conn->prepare(
-                    "INSERT INTO maintenance_requests
-                     (user_id, title, description, priority, status,
-                      date_submitted, date_updated)
-                     VALUES (?, ?, ?, ?, ?, UTC_TIMESTAMP(), UTC_TIMESTAMP())"
-                );
-
-                $insert->bind_param(
-                    "issss",
-                    $userId,
-                    $title,
-                    $description,
-                    $priority,
-                    $status
-                );
-
-                $insert->execute();
-                $insert->close();
+                submitMaintenanceRequest($conn, $userId, $title, $description, $priority);
 
                 $_SESSION["request_success"] =
                     "Maintenance request submitted successfully.";

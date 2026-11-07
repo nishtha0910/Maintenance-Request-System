@@ -5,7 +5,8 @@ header("Content-Type: application/json; charset=utf-8");
 header("Cache-Control: no-store");
 
 require_once __DIR__ . "/../includes/auth.php";
-require_once __DIR__ . "/../includes/request_validation.php"; 
+require_once __DIR__ . "/../includes/request_validation.php";
+require_once __DIR__ . "/../includes/request_submission.php"; 
 
 function respond(int $status, array $data): never
 {
@@ -102,25 +103,7 @@ try {
 
     $conn->set_charset("utf8mb4");
 
-    $insert = $conn->prepare(
-        "INSERT INTO maintenance_requests
-         (user_id, title, description, priority, status,
-          date_submitted, date_updated)
-         VALUES (?, ?, ?, ?, ?, UTC_TIMESTAMP(), UTC_TIMESTAMP())"
-    );
-
-    $insert->bind_param(
-        "issss",
-        $userId,
-        $title,
-        $description,
-        $priority,
-        $status
-    );
-
-    $insert->execute();
-    $requestId = (int) $conn->insert_id;
-    $insert->close();
+    $requestId = submitMaintenanceRequest($conn, $userId, $title, $description, $priority);
 
     respond(201, [
         "message" => "Maintenance request submitted successfully.",

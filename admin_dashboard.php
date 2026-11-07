@@ -22,6 +22,7 @@ unset($_SESSION["updated_request_id"]);
 
 $error = "";
 $requests = [];
+$notifications = null;
 
 try {
     mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -43,6 +44,21 @@ try {
     $check->execute();
     $requests = $check->get_result()->fetch_all(MYSQLI_ASSOC);
     $check->close();
+
+    try {
+        $result = $conn->query(
+            "SELECT n.request_id, r.title, u.name AS tenant_name
+             FROM admin_request_notifications AS n
+             JOIN maintenance_requests AS r ON r.request_id = n.request_id
+             JOIN users AS u ON u.user_id = r.user_id
+             ORDER BY n.created_at DESC, n.request_id DESC
+             LIMIT 5"
+        );
+        $notifications = $result->fetch_all(MYSQLI_ASSOC);
+        $result->free();
+    } catch (mysqli_sql_exception $exception) {
+        error_log("Admin notification query failed: " . $exception->getCode());
+    }
 } catch (mysqli_sql_exception $exception) {
     error_log("Admin dashboard database error: " . $exception->getCode());
 
@@ -72,6 +88,25 @@ function escapeHtml(string $value): string
     <p>Manage all maintenance requests.</p>
     <?php if ($success !== ""): ?>
         <p role="status"><?php echo escapeHtml($success); ?></p>
+    <?php endif; ?>
+    <?php if ($error === ""): ?>
+        <section aria-labelledby="recent-notifications">
+            <h2 id="recent-notifications">Recent request notifications</h2>
+            <?php if ($notifications === null): ?>
+                <p>Notifications are temporarily unavailable.</p>
+            <?php elseif (!$notifications): ?>
+                <p>No new request notifications yet.</p>
+            <?php else: ?>
+                <ul>
+                    <?php foreach ($notifications as $notice): ?>
+                        <li>
+                            <?= escapeHtml($notice["tenant_name"]) ?> submitted
+                            <a href="admin_request.php?id=<?= (int) $notice["request_id"] ?>">#<?= (int) $notice["request_id"] ?>: <?= escapeHtml($notice["title"]) ?></a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </section>
     <?php endif; ?>
     <?php if ($error !== ""): ?>
         <p role="alert"><?php echo escapeHtml($error); ?></p>
