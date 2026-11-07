@@ -19,9 +19,18 @@ function submitMaintenanceRequest(mysqli $conn, int $userId, string $title, stri
         $notify->close();
 
         $conn->commit();
-        return $requestId;
     } catch (Throwable $exception) {
         $conn->rollback();
         throw $exception;
     }
+
+    // The request and dashboard notification are already committed.
+    try {
+        require_once __DIR__ . "/request_email_notifications.php";
+        emailAdminsAboutNewRequest($conn, $requestId, $title, $priority);
+    } catch (Throwable $exception) {
+        error_log("Could not prepare admin notification emails for request #" . $requestId);
+    }
+
+    return $requestId;
 }
