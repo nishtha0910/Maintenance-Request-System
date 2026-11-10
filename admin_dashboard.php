@@ -23,6 +23,16 @@ unset($_SESSION["updated_request_id"]);
 $error = "";
 $requests = [];
 $notifications = null;
+$statuses = ["Submitted", "In Progress", "Completed"];
+$priorities = ["Low", "Medium", "High"];
+$priority = $_GET["priority"] ?? "";
+if (!in_array($priority, $priorities, true)) {
+    $priority = "";
+}
+$status = $_GET["status"] ?? "";
+if (!in_array($status, $statuses, true)) {
+    $status = "";
+}
 
 try {
     mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -31,6 +41,17 @@ try {
     $conn->set_charset("utf8mb4");
 
     // Administrators can view requests from every tenant.
+    $conditions = [];
+    $values = [];
+    if ($status !== "") {
+        $conditions[] = "r.status = ?";
+        $values[] = $status;
+    }
+    if ($priority !== "") {
+        $conditions[] = "r.priority = ?";
+        $values[] = $priority;
+    }
+    $where = $conditions ? "WHERE " . implode(" AND ", $conditions) : "";
     $check = $conn->prepare(
         "SELECT r.request_id, r.title, r.description,
                 r.priority, r.status,
@@ -38,10 +59,11 @@ try {
                 u.name AS tenant_name
          FROM maintenance_requests AS r
          INNER JOIN users AS u ON u.user_id = r.user_id
+         $where
          ORDER BY r.date_submitted DESC, r.request_id DESC"
     );
 
-    $check->execute();
+    $check->execute($values);
     $requests = $check->get_result()->fetch_all(MYSQLI_ASSOC);
     $check->close();
 
@@ -107,15 +129,36 @@ function escapeHtml(string $value): string
                 </ul>
             <?php endif; ?>
         </section>
+        <form class="admin-request-filters" method="get" action="admin_dashboard.php" aria-label="Filter maintenance requests" onchange="this.requestSubmit()">
+            <div>
+                <label for="status-filter">Status:</label>
+                <select id="status-filter" name="status">
+                    <option value="">All statuses</option>
+                    <?php foreach ($statuses as $option): ?>
+                        <option value="<?= escapeHtml($option) ?>" <?= $status === $option ? "selected" : "" ?>><?= escapeHtml($option) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div>
+                <label for="priority-filter">Priority:</label>
+                <select id="priority-filter" name="priority">
+                    <option value="">All priorities</option>
+                    <?php foreach ($priorities as $option): ?>
+                        <option value="<?= escapeHtml($option) ?>" <?= $priority === $option ? "selected" : "" ?>><?= escapeHtml($option) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <noscript><button type="submit">Apply filters</button></noscript>
+        </form>
     <?php endif; ?>
     <?php if ($error !== ""): ?>
         <p role="alert"><?php echo escapeHtml($error); ?></p>
     <?php elseif (!$requests): ?>
-        <div class="empty-state">No maintenance requests have been submitted yet.</div>
+        <div class="empty-state"><?= $status === "" && $priority === "" ? "No maintenance requests have been submitted yet." : "No requests match the selected filters." ?></div>
     <?php else: ?>
         <div class="table-panel">
             <table class="admin-table">
-                <caption>All Maintenance Requests � most recent first</caption>
+                <caption>Maintenance Requests � most recent first</caption>
                 <thead><tr>
                     <th scope="col">Title</th>
                     <th scope="col">Status</th>
