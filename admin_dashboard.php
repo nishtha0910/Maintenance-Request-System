@@ -25,6 +25,20 @@ $requests = [];
 $notifications = null;
 $statuses = ["Submitted", "In Progress", "Completed"];
 $priorities = ["Low", "Medium", "High"];
+// The database priority enum is ordered Low, Medium, High.
+$sortOptions = [
+    "newest" => ["Newest first", "r.date_submitted DESC, r.request_id DESC"],
+    "oldest" => ["Oldest first", "r.date_submitted ASC, r.request_id ASC"],
+    "highest" => ["Highest priority first", "r.priority DESC, r.date_submitted DESC, r.request_id DESC"],
+    "lowest" => ["Lowest priority first", "r.priority ASC, r.date_submitted DESC, r.request_id DESC"],
+];
+$sort = $_GET["sort"] ?? "newest";
+if (!is_string($sort) || !isset($sortOptions[$sort])) {
+    $sort = "newest";
+}
+[$sortLabel, $orderBy] = $sortOptions[$sort];
+$rawSearch = $_GET["q"] ?? "";
+$search = is_string($rawSearch) ? trim($rawSearch) : "";
 $priority = $_GET["priority"] ?? "";
 if (!in_array($priority, $priorities, true)) {
     $priority = "";
@@ -51,6 +65,11 @@ try {
         $conditions[] = "r.priority = ?";
         $values[] = $priority;
     }
+    if ($search !== "") {
+        $conditions[] = "(LOCATE(?, r.title) > 0 OR LOCATE(?, r.description) > 0)";
+        $values[] = $search;
+        $values[] = $search;
+    }
     $where = $conditions ? "WHERE " . implode(" AND ", $conditions) : "";
     $check = $conn->prepare(
         "SELECT r.request_id, r.title, r.description,
@@ -60,7 +79,7 @@ try {
          FROM maintenance_requests AS r
          INNER JOIN users AS u ON u.user_id = r.user_id
          $where
-         ORDER BY r.date_submitted DESC, r.request_id DESC"
+         ORDER BY $orderBy"
     );
 
     $check->execute($values);
@@ -129,36 +148,50 @@ function escapeHtml(string $value): string
                 </ul>
             <?php endif; ?>
         </section>
-        <form class="admin-request-filters" method="get" action="admin_dashboard.php" aria-label="Filter maintenance requests" onchange="this.requestSubmit()">
-            <div>
-                <label for="status-filter">Status:</label>
-                <select id="status-filter" name="status">
-                    <option value="">All statuses</option>
-                    <?php foreach ($statuses as $option): ?>
-                        <option value="<?= escapeHtml($option) ?>" <?= $status === $option ? "selected" : "" ?>><?= escapeHtml($option) ?></option>
-                    <?php endforeach; ?>
-                </select>
+        <form class="admin-request-filters" method="get" action="admin_dashboard.php" aria-label="Filter maintenance requests">
+            <div class="request-search">
+                <label for="request-search">Search:</label>
+                <input type="search" id="request-search" name="q" placeholder="Title or description" value="<?= escapeHtml($search) ?>">
+                <button type="submit">Search</button>
             </div>
-            <div>
-                <label for="priority-filter">Priority:</label>
-                <select id="priority-filter" name="priority">
-                    <option value="">All priorities</option>
-                    <?php foreach ($priorities as $option): ?>
-                        <option value="<?= escapeHtml($option) ?>" <?= $priority === $option ? "selected" : "" ?>><?= escapeHtml($option) ?></option>
-                    <?php endforeach; ?>
-                </select>
+            <div class="request-filter-options">
+                <div>
+                    <label for="status-filter">Status:</label>
+                    <select id="status-filter" name="status" onchange="this.form.requestSubmit()">
+                        <option value="">All statuses</option>
+                        <?php foreach ($statuses as $option): ?>
+                            <option value="<?= escapeHtml($option) ?>" <?= $status === $option ? "selected" : "" ?>><?= escapeHtml($option) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label for="priority-filter">Priority:</label>
+                    <select id="priority-filter" name="priority" onchange="this.form.requestSubmit()">
+                        <option value="">All priorities</option>
+                        <?php foreach ($priorities as $option): ?>
+                            <option value="<?= escapeHtml($option) ?>" <?= $priority === $option ? "selected" : "" ?>><?= escapeHtml($option) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label for="request-sort">Sort:</label>
+                    <select id="request-sort" name="sort" onchange="this.form.requestSubmit()">
+                        <?php foreach ($sortOptions as $key => $option): ?>
+                            <option value="<?= escapeHtml($key) ?>" <?= $sort === $key ? "selected" : "" ?>><?= escapeHtml($option[0]) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
             </div>
-            <noscript><button type="submit">Apply filters</button></noscript>
         </form>
     <?php endif; ?>
     <?php if ($error !== ""): ?>
         <p role="alert"><?php echo escapeHtml($error); ?></p>
     <?php elseif (!$requests): ?>
-        <div class="empty-state"><?= $status === "" && $priority === "" ? "No maintenance requests have been submitted yet." : "No requests match the selected filters." ?></div>
+        <div class="empty-state"><?= $search === "" && $status === "" && $priority === "" ? "No maintenance requests have been submitted yet." : "No requests match your search or filters." ?></div>
     <?php else: ?>
         <div class="table-panel">
             <table class="admin-table">
-                <caption>Maintenance Requests � most recent first</caption>
+                <caption>Maintenance Requests: <?= escapeHtml($sortLabel) ?></caption>
                 <thead><tr>
                     <th scope="col">Title</th>
                     <th scope="col">Status</th>
