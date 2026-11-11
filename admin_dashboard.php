@@ -71,6 +71,17 @@ try {
         $values[] = $search;
     }
     $where = $conditions ? "WHERE " . implode(" AND ", $conditions) : "";
+    $perPage = 10;
+    $count = $conn->prepare("SELECT COUNT(*) FROM maintenance_requests AS r $where");
+    $count->execute($values);
+    $total = (int) $count->get_result()->fetch_row()[0];
+    $count->close();
+
+    $pages = max(1, (int) ceil($total / $perPage));
+    $requestedPage = filter_var($_GET["page"] ?? 1, FILTER_VALIDATE_INT, ["options" => ["min_range" => 1]]);
+    $page = min($requestedPage ?: 1, $pages);
+    $offset = ($page - 1) * $perPage;
+    $filters = ["q" => $search, "status" => $status, "priority" => $priority, "sort" => $sort];
     $check = $conn->prepare(
         "SELECT r.request_id, r.title, r.description,
                 r.priority, r.status,
@@ -79,7 +90,7 @@ try {
          FROM maintenance_requests AS r
          INNER JOIN users AS u ON u.user_id = r.user_id
          $where
-         ORDER BY $orderBy"
+         ORDER BY $orderBy LIMIT $perPage OFFSET $offset"
     );
 
     $check->execute($values);
@@ -203,10 +214,10 @@ function escapeHtml(string $value): string
                     <tr>
                         <td>
                             <strong><?php echo escapeHtml($request['title']); ?></strong>
-                            <small class="request-owner">#<?php echo (int) $request['request_id']; ?> � <?php echo escapeHtml($request['tenant_name']); ?></small>
+                            <small class="request-owner">#<?php echo (int) $request['request_id']; ?> &middot; <?php echo escapeHtml($request['tenant_name']); ?></small>
                         </td>
-                        <td><span class="badge badge-<?php echo escapeHtml(strtolower(str_replace(' ', '-', $request['status']))); ?>"><?php echo escapeHtml($request['status']); ?></span></td>
-                        <td><span class="badge badge-<?php echo escapeHtml(strtolower($request['priority'])); ?>"><?php echo escapeHtml($request['priority']); ?></span></td>
+                        <td><span class="request-card-label" aria-hidden="true">Status</span><span class="badge badge-<?php echo escapeHtml(strtolower(str_replace(' ', '-', $request['status']))); ?>"><?php echo escapeHtml($request['status']); ?></span></td>
+                        <td><span class="request-card-label" aria-hidden="true">Priority</span><span class="badge badge-<?php echo escapeHtml(strtolower($request['priority'])); ?>"><?php echo escapeHtml($request['priority']); ?></span></td>
                         <td><div class="table-actions">
                             <a class="button button-outline" href="admin_request.php?id=<?php echo (int) $request['request_id']; ?>#request-heading" aria-label="View request <?php echo (int) $request['request_id']; ?>">View</a>
                             <a class="button" href="admin_request.php?id=<?php echo (int) $request['request_id']; ?>&amp;mode=edit#update-request" aria-label="Edit request <?php echo (int) $request['request_id']; ?>">Edit</a>
@@ -216,6 +227,17 @@ function escapeHtml(string $value): string
                 </tbody>
             </table>
         </div>
+        <?php if ($pages > 1): ?>
+            <nav aria-label="Request list pages">
+                <?php if ($page > 1): ?>
+                    <a rel="prev" href="?<?= escapeHtml(http_build_query($filters + ["page" => $page - 1])) ?>">Previous</a>
+                <?php endif; ?>
+                <span>Page <?= $page ?> of <?= $pages ?></span>
+                <?php if ($page < $pages): ?>
+                    <a rel="next" href="?<?= escapeHtml(http_build_query($filters + ["page" => $page + 1])) ?>">Next</a>
+                <?php endif; ?>
+            </nav>
+        <?php endif; ?>
     <?php endif; ?>
 </main>
 <?php require __DIR__ . "/includes/site_footer.php"; ?>
