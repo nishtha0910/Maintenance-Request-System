@@ -26,12 +26,18 @@ if ($_SERVER["REQUEST_METHOD"] !== "GET") {
     respond(405, ["error" => "Method not allowed."]);
 }
 
+$status = $_GET["status"] ?? "";
+if ($status !== "" && !in_array($status, ["Submitted", "In Progress", "Completed"], true)) {
+    respond(400, ["error" => "Status must be Submitted, In Progress, or Completed."]);
+}
+
 try {
     mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
     require_once __DIR__ . "/../config/database.php";
 
     $conn->set_charset("utf8mb4");
 
+    $where = $status === "" ? "" : "WHERE r.status = ?";
     $check = $conn->prepare(
         "SELECT r.request_id, r.user_id, r.title, r.description,
                 r.priority, r.status,
@@ -39,9 +45,13 @@ try {
                 u.name AS tenant_name
          FROM maintenance_requests AS r
          INNER JOIN users AS u ON u.user_id = r.user_id
+         $where
          ORDER BY r.date_submitted DESC, r.request_id DESC"
     );
 
+    if ($status !== "") {
+        $check->bind_param("s", $status);
+    }
     $check->execute();
     $requests = $check->get_result()->fetch_all(MYSQLI_ASSOC);
     $check->close();
