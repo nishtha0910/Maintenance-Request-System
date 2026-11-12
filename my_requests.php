@@ -25,15 +25,27 @@ try {
     // Only retrieve requests belonging to the logged-in tenant.
     $userId = (int) $_SESSION["user_id"];
 
+    $perPage = 10;
+    $count = $conn->prepare("SELECT COUNT(*) FROM maintenance_requests WHERE user_id = ?");
+    $count->bind_param("i", $userId);
+    $count->execute();
+    $total = (int) $count->get_result()->fetch_row()[0];
+    $count->close();
+
+    $pages = max(1, (int) ceil($total / $perPage));
+    $requestedPage = filter_var($_GET["page"] ?? 1, FILTER_VALIDATE_INT, ["options" => ["min_range" => 1]]);
+    $page = min($requestedPage ?: 1, $pages);
+    $offset = ($page - 1) * $perPage;
+
     $check = $conn->prepare(
         "SELECT request_id, title, description, priority, status,
                 date_submitted, date_updated
          FROM maintenance_requests
          WHERE user_id = ?
-         ORDER BY date_submitted DESC, request_id DESC"
+         ORDER BY date_submitted DESC, request_id DESC LIMIT ? OFFSET ?"
     );
 
-    $check->bind_param("i", $userId);
+    $check->bind_param("iii", $userId, $perPage, $offset);
     $check->execute();
 
     $requests = $check->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -109,6 +121,17 @@ function escapeHtml(string $value): string
                 </p>
             </article>
         <?php endforeach; ?>
+        <?php if ($pages > 1): ?>
+            <nav aria-label="Request list pages">
+                <?php if ($page > 1): ?>
+                    <a rel="prev" href="?page=<?= $page - 1 ?>">Previous</a>
+                <?php endif; ?>
+                <span>Page <?= $page ?> of <?= $pages ?></span>
+                <?php if ($page < $pages): ?>
+                    <a rel="next" href="?page=<?= $page + 1 ?>">Next</a>
+                <?php endif; ?>
+            </nav>
+        <?php endif; ?>
     <?php endif; ?>
 </main>
 <?php require __DIR__ . "/includes/site_footer.php"; ?>
