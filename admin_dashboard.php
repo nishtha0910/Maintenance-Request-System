@@ -54,6 +54,28 @@ try {
 
     $conn->set_charset("utf8mb4");
 
+    if ($_SERVER["REQUEST_METHOD"] === "POST") {
+        $token = $_POST["token"] ?? "";
+        $requestId = filter_var($_POST["notification_request_id"] ?? null, FILTER_VALIDATE_INT,
+            ["options" => ["min_range" => 1]]);
+        if (!is_string($token) || !hash_equals($_SESSION["logout_token"], $token) || !$requestId) {
+            http_response_code(400);
+            exit("Invalid notification request.");
+        }
+
+        $markRead = $conn->prepare(
+            "INSERT INTO admin_notification_reads (request_id, admin_id)
+             SELECT request_id, ? FROM admin_request_notifications WHERE request_id = ?
+             ON DUPLICATE KEY UPDATE admin_id = VALUES(admin_id)"
+        );
+        $adminId = (int) $_SESSION["user_id"];
+        $markRead->bind_param("ii", $adminId, $requestId);
+        $markRead->execute();
+        $markRead->close();
+        header("Location: admin_request.php?id=" . $requestId, true, 303);
+        exit;
+    }
+
     // Administrators can view requests from every tenant.
     $conditions = [];
     $values = [];
@@ -98,16 +120,23 @@ try {
     $check->close();
 
     try {
-        $result = $conn->query(
+        $noticeQuery = $conn->prepare(
             "SELECT n.request_id, r.title, u.name AS tenant_name
              FROM admin_request_notifications AS n
              JOIN maintenance_requests AS r ON r.request_id = n.request_id
              JOIN users AS u ON u.user_id = r.user_id
+             WHERE NOT EXISTS (SELECT 1 FROM admin_notification_reads AS seen
+                 WHERE seen.request_id = n.request_id AND seen.admin_id = ?)
              ORDER BY n.created_at DESC, n.request_id DESC
              LIMIT 5"
         );
+        $adminId = (int) $_SESSION["user_id"];
+        $noticeQuery->bind_param("i", $adminId);
+        $noticeQuery->execute();
+        $result = $noticeQuery->get_result();
         $notifications = $result->fetch_all(MYSQLI_ASSOC);
         $result->free();
+        $noticeQuery->close();
     } catch (mysqli_sql_exception $exception) {
         error_log("Admin notification query failed: " . $exception->getCode());
     }
@@ -143,7 +172,7 @@ function escapeHtml(string $value): string
     <?php endif; ?>
     <?php if ($error === ""): ?>
         <section aria-labelledby="recent-notifications">
-            <h2 id="recent-notifications">Recent request notifications</h2>
+            <h2 id="recent-notifications">Unread request notifications</h2>
             <?php if ($notifications === null): ?>
                 <p>Notifications are temporarily unavailable.</p>
             <?php elseif (!$notifications): ?>
@@ -153,7 +182,11 @@ function escapeHtml(string $value): string
                     <?php foreach ($notifications as $notice): ?>
                         <li>
                             <?= escapeHtml($notice["tenant_name"]) ?> submitted
-                            <a href="admin_request.php?id=<?= (int) $notice["request_id"] ?>">#<?= (int) $notice["request_id"] ?>: <?= escapeHtml($notice["title"]) ?></a>
+                            <form method="post" action="admin_dashboard.php" style="display: inline; margin: 0;">
+                                <input type="hidden" name="token" value="<?= escapeHtml($_SESSION["logout_token"]) ?>">
+                                <input type="hidden" name="notification_request_id" value="<?= (int) $notice["request_id"] ?>">
+                                <button type="submit">#<?= (int) $notice["request_id"] ?>: <?= escapeHtml($notice["title"]) ?></button>
+                            </form>
                         </li>
                     <?php endforeach; ?>
                 </ul>
