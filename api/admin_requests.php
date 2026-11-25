@@ -5,6 +5,7 @@ header("Content-Type: application/json; charset=utf-8");
 header("Cache-Control: no-store");
 
 require_once __DIR__ . "/../includes/auth.php";
+require_once __DIR__ . "/../includes/request_pagination.php";
 
 function respond(int $status, array $data): never
 {
@@ -66,6 +67,18 @@ try {
         $values[] = $search;
     }
     $where = $conditions ? "WHERE " . implode(" AND ", $conditions) : "";
+    $count = $conn->prepare(
+        "SELECT COUNT(*) FROM maintenance_requests AS r
+         INNER JOIN users AS u ON u.user_id = r.user_id $where"
+    );
+    $count->execute($values);
+    $total = (int) $count->get_result()->fetch_row()[0];
+    $count->close();
+
+    $pagination = requestPagination($total, $_GET["page"] ?? 1);
+    $perPage = $pagination["perPage"];
+    $offset = $pagination["offset"];
+
     $check = $conn->prepare(
         "SELECT r.request_id, r.user_id, r.title, r.description,
                 r.priority, r.status,
@@ -74,7 +87,7 @@ try {
          FROM maintenance_requests AS r
          INNER JOIN users AS u ON u.user_id = r.user_id
          $where
-         ORDER BY $orderBy"
+         ORDER BY $orderBy LIMIT $perPage OFFSET $offset"
     );
 
     $check->execute($values);
@@ -89,7 +102,11 @@ try {
 
     respond(200, [
         "requests" => $requests,
-        "count" => count($requests)
+        "count" => count($requests),
+        "total" => $total,
+        "page" => $pagination["page"],
+        "per_page" => $perPage,
+        "total_pages" => $pagination["pages"]
     ]);
 } catch (mysqli_sql_exception $exception) {
     error_log(
