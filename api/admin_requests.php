@@ -37,6 +37,17 @@ if (!is_string($search)) {
 }
 $search = trim($search);
 
+$sortOptions = [
+    "newest" => "r.date_submitted DESC, r.request_id DESC",
+    "oldest" => "r.date_submitted ASC, r.request_id ASC",
+    "priority" => "FIELD(r.priority, 'High', 'Medium', 'Low'), r.date_submitted DESC, r.request_id DESC",
+];
+$sort = $_GET["sort"] ?? "newest";
+if (!is_string($sort) || !isset($sortOptions[$sort])) {
+    respond(400, ["error" => "Sort must be newest, oldest, or priority."]);
+}
+$orderBy = $sortOptions[$sort];
+
 try {
     mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
     require_once __DIR__ . "/../config/database.php";
@@ -63,7 +74,7 @@ try {
          FROM maintenance_requests AS r
          INNER JOIN users AS u ON u.user_id = r.user_id
          $where
-         ORDER BY r.date_submitted DESC, r.request_id DESC"
+         ORDER BY $orderBy"
     );
 
     $check->execute($values);
