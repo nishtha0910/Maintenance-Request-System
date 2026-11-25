@@ -31,13 +31,30 @@ if ($status !== "" && !in_array($status, ["Submitted", "In Progress", "Completed
     respond(400, ["error" => "Status must be Submitted, In Progress, or Completed."]);
 }
 
+$search = $_GET["search"] ?? "";
+if (!is_string($search)) {
+    respond(400, ["error" => "Search must be text."]);
+}
+$search = trim($search);
+
 try {
     mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
     require_once __DIR__ . "/../config/database.php";
 
     $conn->set_charset("utf8mb4");
 
-    $where = $status === "" ? "" : "WHERE r.status = ?";
+    $conditions = [];
+    $values = [];
+    if ($status !== "") {
+        $conditions[] = "r.status = ?";
+        $values[] = $status;
+    }
+    if ($search !== "") {
+        $conditions[] = "(LOCATE(?, r.title) > 0 OR LOCATE(?, r.description) > 0)";
+        $values[] = $search;
+        $values[] = $search;
+    }
+    $where = $conditions ? "WHERE " . implode(" AND ", $conditions) : "";
     $check = $conn->prepare(
         "SELECT r.request_id, r.user_id, r.title, r.description,
                 r.priority, r.status,
@@ -49,10 +66,7 @@ try {
          ORDER BY r.date_submitted DESC, r.request_id DESC"
     );
 
-    if ($status !== "") {
-        $check->bind_param("s", $status);
-    }
-    $check->execute();
+    $check->execute($values);
     $requests = $check->get_result()->fetch_all(MYSQLI_ASSOC);
     $check->close();
 
