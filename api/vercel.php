@@ -9,7 +9,7 @@ $pages = [
     'request_details.php', 'admin_dashboard.php', 'admin_request.php',
     'api/login.php', 'api/register.php', 'api/profile.php',
     'api/create_requests.php', 'api/my_requests.php',
-    'api/admin_requests.php', 'api/update_request.php'
+    'api/admin_requests.php', 'api/update_request.php', 'api/delete_request.php'
 ];
 $page = ltrim(is_string($path) ? $path : '', '/');
 if ($page === '' || $page === 'index.php') {
