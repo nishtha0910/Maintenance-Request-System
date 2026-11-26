@@ -2,6 +2,7 @@
 session_start();
 
 require_once __DIR__ . "/includes/auth.php";
+require_once __DIR__ . "/includes/request_pagination.php";
 
 if (!isset($_SESSION["user_id"])) {
     header("Location: login.php");
@@ -25,17 +26,17 @@ try {
     // Only retrieve requests belonging to the logged-in tenant.
     $userId = (int) $_SESSION["user_id"];
 
-    $perPage = 10;
     $count = $conn->prepare("SELECT COUNT(*) FROM maintenance_requests WHERE user_id = ?");
     $count->bind_param("i", $userId);
     $count->execute();
     $total = (int) $count->get_result()->fetch_row()[0];
     $count->close();
 
-    $pages = max(1, (int) ceil($total / $perPage));
-    $requestedPage = filter_var($_GET["page"] ?? 1, FILTER_VALIDATE_INT, ["options" => ["min_range" => 1]]);
-    $page = min($requestedPage ?: 1, $pages);
-    $offset = ($page - 1) * $perPage;
+    $pagination = requestPagination($total, $_GET["page"] ?? 1);
+    $perPage = $pagination["perPage"];
+    $pages = $pagination["pages"];
+    $page = $pagination["page"];
+    $offset = $pagination["offset"];
 
     $check = $conn->prepare(
         "SELECT request_id, title, description, priority, status,

@@ -2,6 +2,7 @@
 session_start();
 
 require_once __DIR__ . "/includes/auth.php";
+require_once __DIR__ . "/includes/request_pagination.php";
 
 if (!isset($_SESSION["user_id"])) {
     header("Location: login.php");
@@ -93,16 +94,16 @@ try {
         $values[] = $search;
     }
     $where = $conditions ? "WHERE " . implode(" AND ", $conditions) : "";
-    $perPage = 10;
     $count = $conn->prepare("SELECT COUNT(*) FROM maintenance_requests AS r $where");
     $count->execute($values);
     $total = (int) $count->get_result()->fetch_row()[0];
     $count->close();
 
-    $pages = max(1, (int) ceil($total / $perPage));
-    $requestedPage = filter_var($_GET["page"] ?? 1, FILTER_VALIDATE_INT, ["options" => ["min_range" => 1]]);
-    $page = min($requestedPage ?: 1, $pages);
-    $offset = ($page - 1) * $perPage;
+    $pagination = requestPagination($total, $_GET["page"] ?? 1);
+    $perPage = $pagination["perPage"];
+    $pages = $pagination["pages"];
+    $page = $pagination["page"];
+    $offset = $pagination["offset"];
     $filters = ["q" => $search, "status" => $status, "priority" => $priority, "sort" => $sort];
     $check = $conn->prepare(
         "SELECT r.request_id, r.title, r.description,
@@ -201,7 +202,7 @@ function escapeHtml(string $value): string
             <div class="request-filter-options">
                 <div>
                     <label for="status-filter">Status:</label>
-                    <select id="status-filter" name="status" onchange="this.form.requestSubmit()">
+                    <select id="status-filter" name="status">
                         <option value="">All statuses</option>
                         <?php foreach ($statuses as $option): ?>
                             <option value="<?= escapeHtml($option) ?>" <?= $status === $option ? "selected" : "" ?>><?= escapeHtml($option) ?></option>
@@ -210,7 +211,7 @@ function escapeHtml(string $value): string
                 </div>
                 <div>
                     <label for="priority-filter">Priority:</label>
-                    <select id="priority-filter" name="priority" onchange="this.form.requestSubmit()">
+                    <select id="priority-filter" name="priority">
                         <option value="">All priorities</option>
                         <?php foreach ($priorities as $option): ?>
                             <option value="<?= escapeHtml($option) ?>" <?= $priority === $option ? "selected" : "" ?>><?= escapeHtml($option) ?></option>
@@ -219,13 +220,14 @@ function escapeHtml(string $value): string
                 </div>
                 <div>
                     <label for="request-sort">Sort:</label>
-                    <select id="request-sort" name="sort" onchange="this.form.requestSubmit()">
+                    <select id="request-sort" name="sort">
                         <?php foreach ($sortOptions as $key => $option): ?>
                             <option value="<?= escapeHtml($key) ?>" <?= $sort === $key ? "selected" : "" ?>><?= escapeHtml($option[0]) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
             </div>
+            <div><button type="submit" id="apply-filters">Apply filters</button></div>
         </form>
     <?php endif; ?>
     <?php if ($error !== ""): ?>

@@ -766,10 +766,11 @@ tbody tr:hover {
 @media (max-width: 40rem) {
     .request-filter-options {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.35fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: .5rem;
     }
     .request-filter-options > div { display: grid; }
+    .request-filter-options > div:last-child { grid-column: 1 / -1; }
     .admin-request-filters .request-filter-options select { width: 100%; min-width: 0; }
 }
 .admin-request-filters label { margin: 0; }
@@ -816,4 +817,38 @@ tbody tr:hover {
     .admin-table td:first-child, .admin-table td:last-child { min-width: 0; grid-column: 1 / -1; }
     .admin-table .request-card-label { display: block; color: var(--muted); font-size: .8rem; margin-bottom: .25rem; }
     .admin-table .table-actions .button { min-height: 44px; }
+}
+
+/* Keep unread notifications separated and comfortable to scan. */
+section[aria-labelledby="recent-notifications"] > ul {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+    display: grid;
+    gap: .75rem;
+}
+section[aria-labelledby="recent-notifications"] > ul > li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .6rem 1rem;
+    padding: .85rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: .75rem;
+    background: #fcfafc;
+    overflow-wrap: anywhere;
+}
+section[aria-labelledby="recent-notifications"] li form {
+    max-width: 100%;
+    min-width: 0;
+}
+section[aria-labelledby="recent-notifications"] li button {
+    margin: 0;
+    padding: .55rem .9rem;
+    min-height: 44px;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: left;
 }
